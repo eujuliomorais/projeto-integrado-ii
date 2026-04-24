@@ -1,23 +1,26 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './context/AuthProvider';
+import DashboardPage from './pages/DashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import LoginPage from './pages/LoginPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import PrivateRoute from './routes/PrivateRoute';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
-      </Routes>
-    </BrowserRouter>
-    // <MainLayout menuItems={menuItems}>
-    //   <h1 className="text-2xl font-bold text-gray-800">
-    //     Sistema de emissão de carteirinha
-    //   </h1>
-    //   <p className="mt-2 text-gray-600">conteúdo da tela.</p>
-    // </MainLayout>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          <Route element={<PrivateRoute />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

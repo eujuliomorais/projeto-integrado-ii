@@ -8,14 +8,20 @@ import {
   Typography,
 } from '@mui/material';
 import { useState } from 'react';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+import { login } from '../services/auth/authService';
 import PasswordField from './PasswordField';
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const navigate = useNavigate();
+  const { setAuthToken } = useAuth();
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     setEmailError('');
 
     const data = new FormData(e.currentTarget);
@@ -23,9 +29,11 @@ const LoginForm = () => {
     const password = data.get('password') as string;
 
     setLoading(true);
+
     try {
-      // TODO: integrar com API
-      console.log({ email, password });
+      const { token } = await login({ email, password });
+      setAuthToken(token);
+      navigate('/dashboard');
     } catch {
       setEmailError('Credenciais inválidas. Verifique e tente novamente.');
     } finally {
@@ -81,7 +89,8 @@ const LoginForm = () => {
         />
 
         <Link
-          href="/forgot-password"
+          component={RouterLink}
+          to="/forgot-password"
           underline="hover"
           color="primary"
           sx={{ alignSelf: 'flex-start', fontSize: 14, fontWeight: 500 }}

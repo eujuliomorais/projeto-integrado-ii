@@ -1,33 +1,26 @@
-// src/services/api.ts
 import axios from 'axios';
 
-// cria uma instância do axios
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api', // URL base do seu backend
-  timeout: 10000, // tempo máximo de espera
+  baseURL: 'http://localhost:8080',
 });
 
-// interceptador para incluir token JWT automaticamente
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token'); // ou outro storage
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
 
-// interceptador para tratar erros globais
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // exemplo: redirecionar para login se token inválido
-      console.error('Não autorizado, faça login novamente');
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('token');
     }
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 
