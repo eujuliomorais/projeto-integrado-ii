@@ -1,13 +1,14 @@
 package com.associados.associados.auth.service;
 
-import com.associados.associados.auth.dtos.request.LoginDto;
-import com.associados.associados.auth.dtos.response.LoginResponseDto;
-import com.associados.associados.user.entity.User;
-import com.associados.associados.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+
+import com.associados.associados.auth.dtos.request.LoginDto;
+import com.associados.associados.auth.dtos.response.LoginResponseDto;
+import com.associados.associados.user.entity.User;
+import com.associados.associados.user.repository.UserRepository;
 
 @Service
 public class AuthService {
@@ -27,6 +28,6 @@ public class AuthService {
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
         var token = jwtService.generateToken((User) auth.getPrincipal());
-        return new LoginResponseDto(token);
+        return new LoginResponseDto(token, "Login realizado com sucesso");
     }
 }
