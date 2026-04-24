@@ -1,5 +1,3 @@
-// src/pages/DashboardPage.tsx
-
 import { Typography } from '@mui/material';
 
 import { useAuth } from '../hooks/useAuth';
