@@ -18,10 +18,7 @@ public class AuthService {
 
     @Autowired
     private JWTService jwtService;
-
-    @Autowired
-    private UserRepository userRepository;
-
+    
     public LoginResponseDto login(LoginDto data) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
 
