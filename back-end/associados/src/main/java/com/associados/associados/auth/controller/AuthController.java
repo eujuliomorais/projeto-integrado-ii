@@ -2,6 +2,7 @@ package com.associados.associados.auth.controller;
 
 import com.associados.associados.auth.dtos.request.LoginDto;
 import com.associados.associados.auth.dtos.request.RegisterUserDto;
+import com.associados.associados.auth.dtos.response.LoginResponseDto;
 import com.associados.associados.auth.service.AuthService;
 import com.associados.associados.user.service.UserService;
 import jakarta.validation.Valid;
@@ -23,16 +24,15 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
-
+    //tipando as respostas do controller
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody @Valid LoginDto data) {
+    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginDto data) {
         var response = authService.login(data);
-
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody @Valid RegisterUserDto data) {
+    public ResponseEntity<Void> register(@RequestBody @Valid RegisterUserDto data) {
         this.userService.createUser(data);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

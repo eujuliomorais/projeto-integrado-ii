@@ -3,11 +3,14 @@ package com.associados.associados.auth.infra.exceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import io.swagger.v3.oas.annotations.Hidden;
+
+import java.util.List;
 
 @ControllerAdvice
 @Hidden
@@ -15,18 +18,19 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentials(BadCredentialsException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("E-mail ou senha inválidos");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntime(RuntimeException e) {
-        
+    @ExceptionHandler(BusinessException.class) // Tratando exceção específica
+    public ResponseEntity<String> handleBusiness(BusinessException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationErrors(MethodArgumentNotValidException e) {
-    
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Os campos e-mail e senha são obrigatórios.");
+    public ResponseEntity<List<String>> handleValidationErrors(MethodArgumentNotValidException e) {
+        // Pega todos os erros de validação (NotBlank, Regex, etc) e manda pro front em inglês
+        List<String> errors = e.getBindingResult().getFieldErrors()
+                .stream().map(FieldError::getDefaultMessage).toList();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
 }
