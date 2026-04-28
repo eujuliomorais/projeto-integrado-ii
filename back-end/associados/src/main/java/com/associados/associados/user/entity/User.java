@@ -14,7 +14,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.associados.associados.user.enums.RoleEnum;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,13 +42,14 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String name;
 
     @Column(name = "email_login", nullable = false, unique = true)
+    @Email(message = "The email should be valid", regexp = "^[A-Za-z0-9+_.-]+@(.+)$")
     private String email;
 
-    @Column(name = "senha_hash", nullable = true)
+    @Column(name = "senha_hash", nullable = true, length = 255)
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +64,7 @@ public class User implements UserDetails {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
+    @Column(nullable = false, updatable = true)
     private LocalDateTime updatedAt;
 
 
