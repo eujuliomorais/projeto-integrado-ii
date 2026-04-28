@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.associados.associados.auth.dtos.request.RegisterUserDto;
 import com.associados.associados.user.enums.RoleEnum;
 
 import jakarta.persistence.Column;
@@ -46,7 +47,7 @@ public class User implements UserDetails {
     private String name;
 
     @Column(name = "email_login", nullable = false, unique = true)
-    @Email(message = "The email should be valid", regexp = "^[A-Za-z0-9+_.-]+@(.+)$")
+    @Email(message = "The email should be valid")
     private String email;
 
     @Column(name = "senha_hash", nullable = true, length = 255)
@@ -95,5 +96,11 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return this.isActive;
+    }
+
+    public User(RegisterUserDto data) {
+        this.name = data.name();
+        this.email = data.email();
+        this.role = data.role();
     }
 }
