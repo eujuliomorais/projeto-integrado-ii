@@ -1,7 +1,12 @@
 package com.associados.associados.auth.dtos.request;
 
 import com.associados.associados.user.enums.RoleEnum;
-import jakarta.validation.constraints.*;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 public record RegisterUserDto(
         @NotBlank(message = "Email is required")
@@ -18,4 +23,5 @@ public record RegisterUserDto(
 
         @NotNull(message = "Role is required")
         RoleEnum role
-) {}
+) {
+}
