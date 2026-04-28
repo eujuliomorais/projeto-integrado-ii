@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import com.associados.associados.auth.dtos.request.LoginDto;
 import com.associados.associados.auth.dtos.response.LoginResponseDto;
 import com.associados.associados.user.entity.User;
-import com.associados.associados.user.repository.UserRepository;
 
 @Service
 public class AuthService {
