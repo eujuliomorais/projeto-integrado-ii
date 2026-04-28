@@ -24,13 +24,13 @@ public class UserController {
     private UserService userService;
 
     @PatchMapping("/{id}/email")
-    public ResponseEntity updateEmail(@PathVariable UUID id, @RequestBody @Valid PatchUserEmailDto data) {
+    public ResponseEntity<Void> updateEmail(@PathVariable UUID id, @RequestBody @Valid PatchUserEmailDto data) {
         userService.updateEmail(id, data.email());
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/name")
-    public ResponseEntity updateName(@PathVariable UUID id, @RequestBody @Valid PatchUserNameDto data) {
+    public ResponseEntity<Void> updateName(@PathVariable UUID id, @RequestBody @Valid PatchUserNameDto data) {
         userService.updateName(id, data.name());
         return ResponseEntity.noContent().build();
     }
