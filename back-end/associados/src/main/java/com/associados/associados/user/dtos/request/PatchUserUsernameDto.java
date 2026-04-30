@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record PatchUserUsernameDto(
-        @NotBlank(message = "O username não pode estar em branco")
-        @Size(min = 4, message = "O username deve ter no mínimo 4 caracteres")
+        @NotBlank(message = "The username cannot be blank")
+        @Size(min = 4, message = "The username must have at least 4 characters")
         String username
 ) {}
