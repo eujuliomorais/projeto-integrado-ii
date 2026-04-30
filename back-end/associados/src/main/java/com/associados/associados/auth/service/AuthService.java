@@ -24,6 +24,6 @@ public class AuthService {
         var auth = this.authenticationManager.authenticate(usernamePassword);
 
         var token = jwtService.generateToken((User) auth.getPrincipal());
-        return new LoginResponseDto(token, "Login realizado com sucesso");
+        return new LoginResponseDto(token, "Login successful");
     }
 }
