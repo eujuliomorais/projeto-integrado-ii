@@ -10,9 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.associados.associados.auth.dtos.request.ForgotPasswordRequestDto;
 import com.associados.associados.auth.dtos.request.ResetPasswordDto;
-import com.associados.associados.auth.entity.PasswordResetToken;
+import com.associados.associados.auth.entity.AuthToken;
+import com.associados.associados.auth.enums.TokenType;
 import com.associados.associados.auth.infra.exceptions.BusinessException;
-import com.associados.associados.auth.repository.PasswordResetTokenRepository;
+import com.associados.associados.auth.repository.AuthTokenRepository;
 import com.associados.associados.user.entity.User;
 import com.associados.associados.user.enums.RoleEnum;
 import com.associados.associados.user.repository.UserRepository;
@@ -24,7 +25,7 @@ public class PasswordRecoveryService {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordResetTokenRepository tokenRepository;
+    private AuthTokenRepository tokenRepository;
 
     @Autowired
     private EmailService emailService;
@@ -43,16 +44,17 @@ public class PasswordRecoveryService {
             throw new BusinessException("Associate access is performed via email token.");
         }
 
-        tokenRepository.deleteByUserEmail(user.getEmail());
-
+        tokenRepository.deleteByUserEmailAndType(user.getEmail(),TokenType.FORGOT_PASSWORD);
         tokenRepository.flush();
 
         String token = generateNumericToken(6);
 
-        PasswordResetToken resetToken = new PasswordResetToken();
+        AuthToken resetToken = new AuthToken();
         resetToken.setToken(token);
         resetToken.setUser(user);
+        resetToken.setType(TokenType.FORGOT_PASSWORD); 
         resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+        resetToken.setUsed(false);
 
         tokenRepository.save(resetToken);
 
@@ -62,18 +64,23 @@ public class PasswordRecoveryService {
     @Transactional
     public void resetPassword(ResetPasswordDto data) {
 
-        PasswordResetToken resetToken = tokenRepository.findByToken(data.token())
+        AuthToken resetToken = tokenRepository.findByTokenAndType(data.token(), TokenType.FORGOT_PASSWORD)
                 .orElseThrow(() -> new BusinessException("Recovery token invalid or expired."));
 
         if (resetToken.isExpired()) {
-            tokenRepository.delete(resetToken);
             throw new BusinessException("Recovery token expired.");
         }
+        
+        if (resetToken.isUsed()) {
+            throw new BusinessException("Recovery token already used.");
+        }
+        
         User user = resetToken.getUser();
         user.setPassword(passwordEncoder.encode(data.newPassword()));
         userRepository.save(user);
 
-        tokenRepository.delete(resetToken);
+        resetToken.setUsed(true);
+        tokenRepository.save(resetToken);
     }
 
     private String generateNumericToken(int length) {
