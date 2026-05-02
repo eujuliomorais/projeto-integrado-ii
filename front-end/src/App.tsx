@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
+import AccessControlLoginPage from './pages/AccessControlLoginPage';
 import AssociateLoginPage from './pages/AssociateLoginPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import DashboardPage from './pages/DashboardPage';
@@ -17,14 +18,17 @@ function App() {
         <Routes>
           {/* Públicas */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/login-associado" element={<AssociateLoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+          <Route path="/login-associado" element={<AssociateLoginPage />} />
           <Route path="/token-associado" element={<TokenPage />} />
 
+          <Route path="/login-controle" element={<AccessControlLoginPage />} />
+
+            <Route path="/dashboard" element={<DashboardPage />} />
           {/* Privadas */}
           <Route element={<PrivateRoute />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
 
             <Route path="/settings" element={<ComingSoonPage />} />
             <Route path="/reports" element={<ComingSoonPage />} />
