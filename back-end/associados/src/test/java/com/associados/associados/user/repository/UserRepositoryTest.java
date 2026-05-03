@@ -37,9 +37,9 @@ public class UserRepositoryTest {
     @DisplayName("Should find user by email")
     private void testFindByEmailSucess() {
         RegisterUserDto data = new RegisterUserDto(
-            "john.doe@gmail.com",  
+            "testador@gmail.com",  
             "password123",          
-            "John Doe",            
+            "Testador",            
             RoleEnum.ADMIN          
         );
         
