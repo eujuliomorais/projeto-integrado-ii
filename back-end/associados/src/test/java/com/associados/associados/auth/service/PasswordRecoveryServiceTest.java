@@ -107,7 +107,7 @@ class PasswordRecoveryServiceTest {
     @DisplayName("Should reset password successfully when token is valid")
     void testResetPasswordSuccess() {
 
-        ResetPasswordDto data = new ResetPasswordDto("123456", "newPassword123");
+        ResetPasswordDto data = new ResetPasswordDto("123456", "newPassword123","newPassword123");
         User user = new User();
         AuthToken authToken = new AuthToken();
         authToken.setUser(user);
@@ -130,7 +130,7 @@ class PasswordRecoveryServiceTest {
     @DisplayName("Should throw exception when token is already used")
     void testResetPasswordTokenAlreadyUsed() {
 
-        ResetPasswordDto data = new ResetPasswordDto("123456", "newPassword123");
+        ResetPasswordDto data = new ResetPasswordDto("123456", "newPassword123","newPassword123");
         AuthToken authToken = new AuthToken();
         authToken.setUsed(true);
         authToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
@@ -147,7 +147,7 @@ class PasswordRecoveryServiceTest {
     @DisplayName("Should throw exception when token is expired")
     void testResetPasswordTokenExpired() {
 
-        ResetPasswordDto data = new ResetPasswordDto("123456", "password");
+        ResetPasswordDto data = new ResetPasswordDto("123456", "password","password");
         AuthToken authToken = new AuthToken();
         authToken.setUsed(false);
 
