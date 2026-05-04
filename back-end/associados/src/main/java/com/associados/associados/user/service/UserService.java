@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.associados.associados.auth.dtos.request.RegisterUserDto;
+import com.associados.associados.auth.dtos.request.RegisterAdminDto;
 import com.associados.associados.user.dtos.response.UserResponseDto;
 import com.associados.associados.user.entity.User;
 import com.associados.associados.user.enums.RoleEnum;
@@ -24,7 +24,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public UserResponseDto createUser(RegisterUserDto data) {
+    public UserResponseDto createUser(RegisterAdminDto data) {
         if (userRepository.findByEmail(data.email()).isPresent()) {
             throw new RuntimeException("Email already registered.");
         }

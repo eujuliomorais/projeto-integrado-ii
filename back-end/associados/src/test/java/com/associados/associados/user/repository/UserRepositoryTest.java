@@ -11,7 +11,7 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.associados.associados.auth.dtos.request.RegisterUserDto;
+import com.associados.associados.auth.dtos.request.RegisterAdminDto;
 import com.associados.associados.user.entity.User;
 import com.associados.associados.user.enums.RoleEnum;
 
@@ -26,7 +26,7 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User createUser(RegisterUserDto data) {
+    private User createUser(RegisterAdminDto data) {
         User user = new User(data);
         this.entityManager.persist(user);
         this.entityManager.flush(); 
@@ -36,8 +36,8 @@ public class UserRepositoryTest {
     @Test
     @DisplayName("Should find user by email")
     private void testFindByEmailSucess() {
-        RegisterUserDto data = new RegisterUserDto(
-            "testador@gmail.com",  
+        RegisterAdminDto data = new RegisterAdminDto(
+            "john.doe@gmail.com",  
             "password123",          
             "Testador",            
             RoleEnum.ADMIN          
