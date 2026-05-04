@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-public record RegisterUserDto(
+public record RegisterAdminDto(
         @NotBlank(message = "Email is required")
         @Email(message = "Invalid email format")
         String email,
@@ -23,5 +23,4 @@ public record RegisterUserDto(
 
         @NotNull(message = "Role is required")
         RoleEnum role
-) {
-}
+) {}

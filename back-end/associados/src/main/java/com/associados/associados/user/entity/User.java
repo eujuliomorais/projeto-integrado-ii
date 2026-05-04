@@ -12,7 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.associados.associados.auth.dtos.request.RegisterUserDto;
+import com.associados.associados.auth.dtos.request.RegisterAdminDto;
 import com.associados.associados.user.enums.RoleEnum;
 
 import jakarta.persistence.Column;
@@ -98,7 +98,7 @@ public class User implements UserDetails {
         return this.isActive;
     }
 
-    public User(RegisterUserDto data) {
+    public User(RegisterAdminDto data) {
         this.name = data.name();
         this.email = data.email();
         this.role = data.role();
