@@ -27,6 +27,6 @@ public class AssociateController {
     public ResponseEntity<MessageResponseDto> registerAssociate(@RequestBody @Valid RegisterAssociateDto data) {
         associateService.register(data);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponseDto("Associado registrado com sucesso!"));
+                .body(new MessageResponseDto("Associate registered successfully!"));
     }
 }
