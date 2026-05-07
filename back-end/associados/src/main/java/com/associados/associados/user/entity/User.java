@@ -53,12 +53,21 @@ public class User implements UserDetails {
     @Column(name = "senha_hash", nullable = true, length = 255)
     private String password;
 
+    @Column(nullable = false, unique = true, length = 11)
+    private String cpf;
+
+    @Column(nullable = false, length = 11)
+    private String phone;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RoleEnum role;
 
     @Column(name = "is_active")
     private boolean isActive = true;
+
+    @Column(name = "access_key_hash", nullable = true, length = 255)
+    private String accessKeyHash;
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
@@ -67,7 +76,6 @@ public class User implements UserDetails {
     @LastModifiedDate
     @Column(nullable = false, updatable = true)
     private LocalDateTime updatedAt;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -99,8 +107,10 @@ public class User implements UserDetails {
     }
 
     public User(RegisterAdminDto data) {
-        this.name = data.name();
+        this.name = data.fullName();
         this.email = data.email();
+        this.cpf = data.cpf();
+        this.phone = data.phone();
         this.role = data.role();
     }
 }

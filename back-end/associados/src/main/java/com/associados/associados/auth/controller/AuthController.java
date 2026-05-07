@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.associados.associados.auth.dtos.request.AccessKeyLoginDto;
 import com.associados.associados.auth.dtos.request.ForgotPasswordRequestDto;
 import com.associados.associados.auth.dtos.request.LoginAdminDto;
 import com.associados.associados.auth.dtos.request.LoginAssociateDto;
@@ -32,6 +33,12 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginAdminDto data) {
         var response = authService.login(data);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/access-manager/login")
+    public ResponseEntity<LoginResponseDto> loginAccessManager(@RequestBody @Valid AccessKeyLoginDto data) {
+        var response = authService.loginAccessManager(data);
         return ResponseEntity.ok(response);
     }
 
