@@ -30,7 +30,7 @@ public class UserService {
         }
 
         User newUser = new User();
-        newUser.setName(data.name());
+        newUser.setName(data.fullName());
         newUser.setEmail(data.email());
         newUser.setRole(data.role());
 

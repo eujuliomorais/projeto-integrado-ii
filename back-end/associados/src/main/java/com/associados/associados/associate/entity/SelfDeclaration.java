@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.associados.associados.associate.enums.EscolaridadeEnum;
 import com.associados.associados.associate.enums.RendaEnum;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,16 +24,23 @@ public class SelfDeclaration {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    
-    private String raca;
-    private String genero;
-    private String orientacaoSexual;
-    
+
+    @Column(length = 50)
+    private String race;
+
+    @Column(length = 50)
+    private String gender;
+
+    @Column(length = 100)
+    private String sexualOrientation;
+
     @Enumerated(EnumType.STRING)
-    private EscolaridadeEnum escolaridade;
-    
+    private EscolaridadeEnum education;
+
     @Enumerated(EnumType.STRING)
-    private RendaEnum renda;
-    
-    private String deficiencia;
+    private RendaEnum income;
+
+    @Column(length = 255)
+    private String disability;
 }
+
