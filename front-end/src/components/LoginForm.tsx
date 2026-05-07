@@ -15,24 +15,34 @@ import PasswordField from './PasswordField';
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
-  const [emailError, setEmailError] = useState('');
-  const navigate = useNavigate();
-  const { setAuthToken } = useAuth();
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+  const [emailError, setEmailError] = useState('');
+
+  const navigate = useNavigate();
+
+  const { setAuthData } = useAuth();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setEmailError('');
 
     const data = new FormData(e.currentTarget);
+
     const email = data.get('email') as string;
+
     const password = data.get('password') as string;
 
     setLoading(true);
 
     try {
-      const { token } = await login({ email, password });
-      setAuthToken(token);
+      const { token, user } = await login({
+        email,
+        password,
+      });
+
+      setAuthData(token, user);
+
       navigate('/dashboard');
     } catch {
       setEmailError('Credenciais inválidas. Verifique e tente novamente.');

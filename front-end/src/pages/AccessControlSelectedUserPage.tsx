@@ -1,9 +1,8 @@
 import AccessControlSelectedUserForm from '../components/AccessControlSelectedUserForm';
-import { menuItems } from '../config/menuItems';
-import MainLayout from '../layouts/MainLayout';
+import { superAdminItems } from '../config/sidebarItems/superAdminItems';import MainLayout from '../layouts/MainLayout';
 
 const AccessControlSelectedUserPage = () => (
-  <MainLayout menuItems={menuItems} pageTitle="Perfil de Gestor">
+  <MainLayout menuItems={superAdminItems} pageTitle="Perfil de Gestor">
     <AccessControlSelectedUserForm />
   </MainLayout>
 );

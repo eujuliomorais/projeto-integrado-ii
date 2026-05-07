@@ -1,9 +1,9 @@
 import AccessControlProfileForm from '../components/AccessControlProfileForm';
-import { menuItems } from '../config/menuItems';
+import { superAdminItems } from '../config/sidebarItems/superAdminItems';
 import MainLayout from '../layouts/MainLayout';
 
 const AccessControlProfilePage = () => (
-  <MainLayout menuItems={menuItems} pageTitle="Meu Perfil">
+  <MainLayout menuItems={superAdminItems} pageTitle="Meu Perfil">
     <AccessControlProfileForm />
   </MainLayout>
 );

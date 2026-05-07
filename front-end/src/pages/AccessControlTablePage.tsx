@@ -1,9 +1,9 @@
 import AccessControlSearchTable from '../components/AccessControlSearchTable';
-import { menuItems } from '../config/menuItems';
+import { superAdminItems } from '../config/sidebarItems/superAdminItems';
 import MainLayout from '../layouts/MainLayout';
 
 const AccessControlTablePage = () => (
-  <MainLayout menuItems={menuItems} pageTitle="Controle de Acesso">
+  <MainLayout menuItems={superAdminItems} pageTitle="Controle de Acesso">
     <AccessControlSearchTable />
   </MainLayout>
 );
