@@ -1,6 +1,6 @@
-import { type MenuItem } from '../components/Sidebar';
+import { type SidebarItem } from '../components/Sidebar';
 
-export const menuItems: MenuItem[] = [
+export const menuItems: SidebarItem[] = [
   { label: 'Dashboard', href: '/dashboard' },
   { label: 'Configurações', href: '/settings' },
   { label: 'Relatórios', href: '/reports' },

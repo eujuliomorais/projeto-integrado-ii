@@ -30,7 +30,7 @@ const AccessControlLoginForm = () => {
       //   setAuthToken(token);
 
       console.log({ 'chave de acesso: ': accessKey });
-        navigate('/');
+      navigate('/controle-de-acesso');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
+import { default as AccessControlCreatePage } from './pages/AccessControlCreatePage';
 import AccessControlLoginPage from './pages/AccessControlLoginPage';
+import AccessControlProfilePage from './pages/AccessControlProfilePage';
+import AccessControlSelectedUserPage from './pages/AccessControlSelectedUserPage';
+import { default as AccessControlTablePage } from './pages/AccessControlTablePage';
 import AssociateLoginPage from './pages/AssociateLoginPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import DashboardPage from './pages/DashboardPage';
@@ -26,10 +30,27 @@ function App() {
 
           <Route path="/login-controle" element={<AccessControlLoginPage />} />
 
-            <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+
+          <Route
+            path="/controle-de-acesso"
+            element={<AccessControlTablePage />}
+          />
+          <Route
+            path="/controle-de-acesso/novo"
+            element={<AccessControlCreatePage />}
+          />
+          <Route // pagina para usuario selecionado na tabela
+            path="/controle-de-acesso/:id"
+            element={<AccessControlSelectedUserPage />}
+          />
+          <Route // pagina para gerenciar proprio perfil
+            path="controle-de-acesso/meu-perfil"
+            element={<AccessControlProfilePage />}
+          />
+
           {/* Privadas */}
           <Route element={<PrivateRoute />}>
-
             <Route path="/settings" element={<ComingSoonPage />} />
             <Route path="/reports" element={<ComingSoonPage />} />
             <Route path="/users" element={<ComingSoonPage />} />
