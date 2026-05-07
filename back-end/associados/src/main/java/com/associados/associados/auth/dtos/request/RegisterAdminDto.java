@@ -1,11 +1,13 @@
 package com.associados.associados.auth.dtos.request;
 
 import com.associados.associados.user.enums.RoleEnum;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 public record RegisterAdminDto(
+        @JsonUnwrapped
         @Valid
         BaseRegisterDto baseData,
 
