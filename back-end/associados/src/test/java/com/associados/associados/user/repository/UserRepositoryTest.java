@@ -11,14 +11,13 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.associados.associados.auth.dtos.request.RegisterAdminDto;
 import com.associados.associados.user.entity.User;
 import com.associados.associados.user.enums.RoleEnum;
 
 @DataJpaTest
 @ActiveProfiles("tests") 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     private TestEntityManager entityManager;
@@ -26,34 +25,34 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User createUser(RegisterAdminDto data) {
-        User user = new User(data);
+    private User persistUser(String email, String name, RoleEnum role) {
+        User user = new User();
+        user.setEmail(email);
+        user.setName(name);
+        user.setRole(role);
+        user.setPassword("encoded_password");
+        
         this.entityManager.persist(user);
-        this.entityManager.flush(); 
         return user;
     }
 
     @Test
-    @DisplayName("Should find user by email")
-    private void testFindByEmailSucess() {
-        RegisterAdminDto data = new RegisterAdminDto(
-            "john.doe@gmail.com",  
-            "password123",          
-            "Testador",            
-            RoleEnum.ADMIN          
-        );
+    @DisplayName("Should find user by email when it exists in database")
+    void testFindByEmailSuccess() { 
+        String email = "john.doe@gmail.com";
+        this.persistUser(email, "John Doe", RoleEnum.ADMIN);
         
-        this.createUser(data);
-        
-        Optional<User> result = this.userRepository.findByEmail(data.email());
+        Optional<User> result = this.userRepository.findByEmail(email);
 
-        assertThat(result.isPresent()).isTrue();
+        assertThat(result).isPresent();
+        assertThat(result.get().getEmail()).isEqualTo(email);
     }
 
     @Test
-    @DisplayName("Should not find user by email")
-    private void testFindByEmailFail() {
+    @DisplayName("Should return empty optional when user does not exist")
+    void testFindByEmailFail() {
         Optional<User> result = this.userRepository.findByEmail("nonexistent@gmail.com");
-        assertThat(result.isPresent()).isFalse();
+        
+        assertThat(result).isEmpty();
     }
 }

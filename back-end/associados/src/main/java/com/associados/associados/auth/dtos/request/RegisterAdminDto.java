@@ -12,7 +12,11 @@ public record RegisterAdminDto(
         @NotNull(message = "Role is required")
         RoleEnum role
 ) {
-        public String email() {
+        public RegisterAdminDto(String string, String string2, String string3, RoleEnum admin) {
+		this(new BaseRegisterDto(string, string2, string3, string3, string3), admin);
+	}
+
+		public String email() {
                 return baseData.email();
         }
 
