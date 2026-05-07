@@ -32,6 +32,8 @@ public class UserService {
         User newUser = new User();
         newUser.setName(data.fullName());
         newUser.setEmail(data.email());
+        newUser.setCpf(data.cpf());
+        newUser.setPhone(data.phone());
         newUser.setRole(data.role());
 
         if (data.role() != RoleEnum.ASSOCIATE) {

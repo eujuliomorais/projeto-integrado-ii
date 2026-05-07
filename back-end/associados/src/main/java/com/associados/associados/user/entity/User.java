@@ -112,5 +112,6 @@ public class User implements UserDetails {
         this.cpf = data.cpf();
         this.phone = data.phone();
         this.role = data.role();
+        this.password = data.password();
     }
 }
