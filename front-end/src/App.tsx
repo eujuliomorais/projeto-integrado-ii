@@ -9,6 +9,8 @@ import AssociateLoginPage from './pages/AssociateLoginPage';
 import ComingSoonPage from './pages/ComingSoonPage';
 import DashboardPage from './pages/DashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import LandingPage from './pages/LandingPage';
+import LandingValidatePage from './pages/LandingValidatePage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
@@ -21,6 +23,9 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Públicas */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/validate" element={<LandingValidatePage />} />
+
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -58,7 +63,7 @@ function App() {
           </Route>
 
           {/* Não implementadas */}
-          <Route path="/" element={<ComingSoonPage />} />
+          <Route path="/futura" element={<ComingSoonPage />} />
 
           {/* Inexistentes */}
           <Route path="*" element={<NotFoundPage />} />
