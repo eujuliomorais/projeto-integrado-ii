@@ -9,16 +9,25 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-// import { useAuth } from '../hooks/useAuth';
-// import { login } from '../services/auth/authService';
+import { useAuth } from '../hooks/useAuth';
+import {
+  accessControlLogin,
+  getAuthUserNoAPI,
+} from '../services/auth/authService';
 
 const AccessControlLoginForm = () => {
   const [loading, setLoading] = useState(false);
+
+  const [keyError, setKeyError] = useState('');
+
   const navigate = useNavigate();
-  //   const { setAuthToken } = useAuth();
+
+  const { setAuthData } = useAuth();
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setKeyError('');
 
     const data = new FormData(e.currentTarget);
     const accessKey = data.get('accessKey') as string;
@@ -26,11 +35,18 @@ const AccessControlLoginForm = () => {
     setLoading(true);
 
     try {
-      //   const { token } = await login({ email, password });
-      //   setAuthToken(token);
+      const { token, user } = await accessControlLogin({ accessKey });
+
+      const fakeUser = getAuthUserNoAPI(token);
+      setAuthData(token, fakeUser);
 
       console.log({ 'chave de acesso: ': accessKey });
+      console.log({ 'token: ': token });
+      console.log({ 'user: ': user });
+      console.log({ 'fake-user: ': fakeUser });
       navigate('/controle-de-acesso');
+    } catch (error) {
+      setKeyError('Chave inválida! Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -82,6 +98,8 @@ const AccessControlLoginForm = () => {
           placeholder="Digite a Chave de Acesso"
           fullWidth
           required
+          error={!!keyError}
+          helperText={keyError}
         />
 
         <Button

@@ -1,12 +1,12 @@
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import {
   Box,
   Button,
   CircularProgress,
-  Divider,
+  FormControl,
   Grid,
+  InputLabel,
   MenuItem,
-  Paper,
   Select,
   Stack,
   TextField,
@@ -15,27 +15,40 @@ import {
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PasswordField from '../components/PasswordField';
+import { accessControlCreate } from '../services/auth/authService';
+import { type Role } from '../services/auth/roles';
 
 const AccessControlCreateForm = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [confirmError, setConfirmError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setConfirmError('');
-    const data = new FormData(e.currentTarget);
-    const password = data.get('password') as string;
-    const confirm = data.get('passwordConfirm') as string;
-
-    if (password !== confirm) {
-      setConfirmError('As senhas não coincidem.');
-      return;
-    }
 
     setLoading(true);
+
     try {
-      // TODO: API call
+      const data = new FormData(e.currentTarget);
+
+      const role = data.get('type') as Role;
+      const fullName = data.get('name') as string;
+      const phone = data.get('phone') as string;
+      const cpf = data.get('cpf') as string;
+      const email = data.get('email') as string;
+      const password = data.get('password') as string;
+
+      const res = await accessControlCreate({
+        cpf,
+        email,
+        fullName,
+        password,
+        phone,
+        role,
+      });
+
+      console.log(res);
+      console.log(res.message);
+
       console.log(Object.fromEntries(data));
       navigate('/controle-de-acesso');
     } finally {
@@ -43,154 +56,127 @@ const AccessControlCreateForm = () => {
     }
   };
 
-  return (
-    <Stack spacing={3}>
-      <Button
-        startIcon={<ArrowBackIcon sx={{ fontSize: 18 }} />}
-        onClick={() => navigate('/controle-de-acesso')}
-        sx={{
-          alignSelf: 'flex-start',
-          color: 'text.secondary',
-          fontWeight: 600,
-          textTransform: 'none',
-          p: 0,
-          '&:hover': { bgcolor: 'transparent', color: 'primary.main' },
-        }}
-      >
-        Voltar
-      </Button>
+  const roleLabels = {
+    ADMIN: 'Administrador',
+    CONSULTANT: 'Circulador',
+  };
 
-      <Paper
-        elevation={0}
-        component="form"
-        onSubmit={handleSubmit}
-        noValidate
-        sx={{
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
-          p: { xs: 2, sm: 3 },
-        }}
-      >
-        <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2.5 }}>
+  return (
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      noValidate
+      sx={{ width: '100%' }}
+    >
+      <Stack spacing={4}>
+        {/* Voltar */}
+        <Button
+          startIcon={<ArrowBackIosIcon sx={{ fontSize: 14 }} />}
+          onClick={() => navigate('/controle-de-acesso')}
+          sx={{
+            alignSelf: 'flex-start',
+            color: 'text.secondary',
+            fontWeight: 600,
+            textTransform: 'none',
+            p: 0,
+            '&:hover': { bgcolor: 'transparent', color: 'primary.main' },
+          }}
+        >
+          Voltar
+        </Button>
+
+        {/* Título seção */}
+        <Typography variant="h6" sx={{ fontWeight: 700 }} color="text.primary">
           Dados Pessoais
         </Typography>
 
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12, sm: 6 }}>
+        {/* Linha 1: Nome, Telefone, CPF */}
+        <Grid container spacing={2.5}>
+          <Grid size={{ xs: 12, sm: 5 }}>
             <TextField
               label="Nome Completo"
               name="name"
+              placeholder="Informe o nome"
               required
               fullWidth
-              size="small"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
-            <TextField
-              label="Data de Nasc."
-              name="birthDate"
-              type="date"
-              required
-              fullWidth
-              size="small"
               slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 2 }}>
-            <TextField
-              label="UF"
-              name="state"
-              required
-              fullWidth
-              size="small"
-              slotProps={{
-                htmlInput: {
-                  maxLength: 2,
-                  style: { textTransform: 'uppercase' },
-                },
-              }}
-            />
-          </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
-              label="Telefone / Celular"
+              label="Telefone"
               name="phone"
+              placeholder="Digite o telefone"
               required
               fullWidth
-              size="small"
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 4 }}>
+          <Grid size={{ xs: 12, sm: 3 }}>
             <TextField
-              label="Informe o CPF"
+              label="CPF"
               name="cpf"
+              placeholder="Informe o CPF"
               required
               fullWidth
-              size="small"
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
+
+          {/* Linha 2: Email, Senha Temporária, Tipo de Perfil */}
           <Grid size={{ xs: 12, sm: 4 }}>
             <TextField
-              label="E-mail"
+              label="Email"
               name="email"
               type="email"
+              placeholder="Informe o E-mail"
               required
               fullWidth
-              size="small"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <PasswordField
-              label="Senha"
-              name="password"
-              placeholder="Digite a senha"
-              helperText=" "
-              fullWidth
-              size="small"
-              required
-              autoComplete="new-password"
-            />
-          </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <PasswordField
-              label="Confirmar Senha"
-              name="passwordConfirm"
-              placeholder="Confirme a senha"
-              error={!!confirmError}
-              helperText={confirmError || ' '}
-              fullWidth
-              size="small"
-              required
-              autoComplete="new-password"
+              slotProps={{ inputLabel: { shrink: true } }}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Select
-              name="type"
-              defaultValue=""
-              displayEmpty
-              fullWidth
-              size="small"
+            <PasswordField
+              label="Senha Temporária"
+              name="password"
+              placeholder="Digite a senha"
               required
-              renderValue={(v) =>
-                v === '' ? (
-                  <Box component="span" sx={{ color: 'text.disabled' }}>
-                    Tipo de Acesso
-                  </Box>
-                ) : (
-                  String(v)
-                )
-              }
-            >
-              <MenuItem value="Administrador">Administrador</MenuItem>
-              <MenuItem value="Circulador">Circulador</MenuItem>
-            </Select>
+              fullWidth
+              autoComplete="new-password"
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <FormControl fullWidth required>
+              <InputLabel shrink>Tipo de Perfil</InputLabel>
+
+              <Select
+                name="type"
+                defaultValue=""
+                label="Tipo de Perfil"
+                displayEmpty
+                notched
+                renderValue={(v) =>
+                  v === '' ? (
+                    <Box component="span" sx={{ color: 'text.disabled' }}>
+                      Selecione
+                    </Box>
+                  ) : (
+                    roleLabels[v as keyof typeof roleLabels]
+                  )
+                }
+              >
+                {Object.entries(roleLabels).map(([value, label]) => (
+                  <MenuItem key={value} value={value}>
+                    {label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
         </Grid>
 
-        <Divider sx={{ my: 3 }} />
-
+        {/* Botões */}
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
@@ -201,14 +187,16 @@ const AccessControlCreateForm = () => {
             variant="contained"
             onClick={() => navigate('/controle-de-acesso')}
             sx={{
-              bgcolor: 'text.secondary',
-              color: '#fff',
-              fontWeight: 600,
+              bgcolor: 'grey.300',
+              color: 'text.primary',
+              fontWeight: 700,
               borderRadius: 10,
               textTransform: 'none',
-              px: 3,
+              px: 4,
+              py: 1.5,
+              boxShadow: 'none',
               width: { xs: '100%', sm: 'auto' },
-              '&:hover': { bgcolor: 'text.primary' },
+              '&:hover': { bgcolor: 'grey.400', boxShadow: 'none' },
             }}
           >
             Cancelar
@@ -219,22 +207,23 @@ const AccessControlCreateForm = () => {
             color="primary"
             disabled={loading}
             sx={{
-              fontWeight: 600,
+              fontWeight: 700,
               borderRadius: 10,
               textTransform: 'none',
-              px: 3,
+              px: 4,
+              py: 1.5,
               width: { xs: '100%', sm: 'auto' },
             }}
           >
             {loading ? (
-              <CircularProgress size={20} color="inherit" />
+              <CircularProgress size={22} color="inherit" />
             ) : (
-              'Continuar'
+              'Confirmar'
             )}
           </Button>
         </Stack>
-      </Paper>
-    </Stack>
+      </Stack>
+    </Box>
   );
 };
 

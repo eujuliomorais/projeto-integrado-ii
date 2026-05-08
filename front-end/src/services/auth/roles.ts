@@ -6,3 +6,16 @@ export const roleLabels: Record<Role, string> = {
   CONSULTANT: 'Consultant',
   ASSOCIATE: 'Associate',
 };
+
+export const normalizeRoleView = (role: Role) => {
+  switch (role) {
+    case 'SUPER_ADMIN':
+      return 'Controle de Acesso';
+    case 'ADMIN':
+      return 'Administrador';
+    case 'ASSOCIATE':
+      return 'Associado';
+    case 'CONSULTANT':
+      return 'Consultor';
+  }
+};

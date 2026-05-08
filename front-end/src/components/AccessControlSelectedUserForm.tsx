@@ -7,129 +7,189 @@ import {
   Button,
   CircularProgress,
   Divider,
+  FormControl,
   Grid,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
+  Skeleton,
   Stack,
   TextField,
   Typography,
 } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import DeleteConfirmDialog from './DeleteConfirmDialog';
+import { normalizeRoleView, type Role } from '../services/auth/roles';
+import {
+  accessControlDeleteUser,
+  accessControlGetUserById,
+  accessControlUpdateUser,
+  accessControlUpdateUserRole,
+  type AccessControlGetUserByIdResponse,
+} from '../services/user/userService';
+import { default as DeleteConfirmDialog } from './DeleteConfirmDialog';
 
-type UserType = 'Administrador' | 'Circulador';
-
-interface ProfileData {
-  id: string;
-  name: string;
-  cpf: string;
-  type: UserType;
-  email: string;
-  phone: string;
-  birthDate: string;
-  state: string;
-  address: string;
-  registrationDate: string;
-}
-
-// TODO: substituir por chamada de API
-const MOCK_USERS: ProfileData[] = [
-  {
-    id: '1',
-    name: 'João da Silva',
-    cpf: '000.000.000-00',
-    type: 'Administrador',
-    email: 'joao@email.com',
-    phone: '(85) 9 0000-0000',
-    birthDate: '01/01/1990',
-    state: 'CE',
-    address: 'Rua Exemplo, 123',
-    registrationDate: '01/01/2024',
-  },
-  {
-    id: '2',
-    name: 'Maria Lopes Braga',
-    cpf: '111.111.111-11',
-    type: 'Administrador',
-    email: 'maria@email.com',
-    phone: '(85) 9 1111-1111',
-    birthDate: '15/03/1985',
-    state: 'CE',
-    address: 'Av. Principal, 456',
-    registrationDate: '05/03/2024',
-  },
-  {
-    id: '3',
-    name: 'Ana Safira Lima',
-    cpf: '222.222.222-22',
-    type: 'Circulador',
-    email: 'ana@email.com',
-    phone: '(85) 9 2222-2222',
-    birthDate: '22/07/1995',
-    state: 'CE',
-    address: 'Rua das Flores, 789',
-    registrationDate: '10/05/2024',
-  },
-  {
-    id: '4',
-    name: 'Gabriel Mendes',
-    cpf: '333.333.333-33',
-    type: 'Circulador',
-    email: 'gabriel@email.com',
-    phone: '(85) 9 3333-3333',
-    birthDate: '30/11/1998',
-    state: 'CE',
-    address: 'Travessa Central, 12',
-    registrationDate: '20/06/2024',
-  },
-];
+type FormState = AccessControlGetUserByIdResponse & { id: string };
 
 const AccessControlSelectedUserForm = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const user = MOCK_USERS.find((u) => u.id === id) ?? MOCK_USERS[0];
+  const [form, setForm] = useState<FormState | null>(null);
+  const [loadingData, setLoadingData] = useState(true);
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState<ProfileData>({ ...user });
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    const load = async () => {
+      setLoadingData(true);
+      setError('');
+      try {
+        const data = await accessControlGetUserById({ id });
+
+        if (!cancelled) setForm({ ...data, id });
+      } catch {
+        if (!cancelled) setError('Não foi possível carregar o perfil.');
+      } finally {
+        if (!cancelled) setLoadingData(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const handleSave = async () => {
-    setLoading(true);
+    if (!form || !id) return;
+
+    setSaving(true);
+    setError('');
+
+    const {
+      cpf,
+      email,
+      id: formId,
+      name: fullName,
+      phone,
+      role: newRole,
+    } = form;
+
     try {
-      // TODO: API call
-      console.log('Save:', form);
+      await accessControlUpdateUser({
+        id: formId,
+        fullName,
+        email,
+        cpf,
+        phone,
+      });
+
+      await accessControlUpdateUserRole({ id: formId, newRole });
+
       setEditing(false);
+    } catch (err) {
+      setError('Erro ao salvar alterações');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleCancel = () => {
-    setEditing(false);
-    setForm({ ...user });
-  };
-
   const handleDeleteConfirm = async () => {
-    // TODO: API call de exclusão
-    console.log('Delete user:', id);
-    navigate('/controle-de-acesso');
+    if (!id) return;
+
+    try {
+      setLoadingData(true);
+
+      await accessControlDeleteUser({ id });
+
+      navigate('/controle-de-acesso');
+    } catch (err) {
+      setError('Erro ao deletar usuário');
+    } finally {
+      setLoadingData(false);
+      setDeleteOpen(false);
+    }
   };
 
-  const field = (
-    label: string,
-    key: keyof ProfileData,
-    forceDisabled = false
-  ) => (
+  const field = (label: string, key: keyof FormState, disabled = false) => (
     <TextField
       label={label}
-      value={form[key]}
-      onChange={(e) => setForm((prev) => ({ ...prev, [key]: e.target.value }))}
-      disabled={forceDisabled || !editing}
+      value={form?.[key] ?? ''}
+      onChange={(e) =>
+        setForm((prev) => (prev ? { ...prev, [key]: e.target.value } : prev))
+      }
+      disabled={disabled || !editing}
       size="small"
       fullWidth
     />
   );
+
+  /* ── Loading ── */
+  if (loadingData) {
+    return (
+      <Stack spacing={3}>
+        <Skeleton width={80} height={32} />
+        <Paper
+          elevation={0}
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 2,
+            p: 3,
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={2}
+            sx={{ alignItems: 'center', mb: 3 }}
+          >
+            <Skeleton variant="circular" width={80} height={80} />
+            <Stack spacing={1}>
+              <Skeleton width={180} height={24} />
+              <Skeleton width={100} height={18} />
+            </Stack>
+          </Stack>
+          <Divider sx={{ mb: 3 }} />
+          <Grid container spacing={2}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Grid key={i} size={{ xs: 12, sm: 6, md: 4 }}>
+                <Skeleton height={40} />
+              </Grid>
+            ))}
+          </Grid>
+        </Paper>
+      </Stack>
+    );
+  }
+
+  /* ── Erro ── */
+  if (error || !form) {
+    return (
+      <Stack spacing={3}>
+        <Button
+          startIcon={<ArrowBackIcon sx={{ fontSize: 18 }} />}
+          onClick={() => navigate('/controle-de-acesso')}
+          sx={{
+            alignSelf: 'flex-start',
+            color: 'text.secondary',
+            fontWeight: 600,
+            textTransform: 'none',
+            p: 0,
+          }}
+        >
+          Voltar
+        </Button>
+        <Typography color="error">
+          {error || 'Usuário não encontrado.'}
+        </Typography>
+      </Stack>
+    );
+  }
 
   return (
     <>
@@ -158,7 +218,7 @@ const AccessControlSelectedUserForm = () => {
             p: { xs: 2, sm: 3 },
           }}
         >
-          {/* Header */}
+          {/* Header: avatar + nome + botão editar */}
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             sx={{
@@ -183,14 +243,14 @@ const AccessControlSelectedUserForm = () => {
                   color: 'text.secondary',
                 }}
               >
-                {form.name.charAt(0)}
+                {form.name?.charAt(0) ?? '?'}
               </Avatar>
               <Box sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
                   {form.name}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  {form.type}
+                  {normalizeRoleView(form.role)}
                 </Typography>
               </Box>
             </Stack>
@@ -226,23 +286,35 @@ const AccessControlSelectedUserForm = () => {
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>{field('CPF', 'cpf')}</Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              {field('Nascimento', 'birthDate')}
+              {field('Telefone', 'phone')}
             </Grid>
-            <Grid size={{ xs: 12, sm: 8 }}>{field('Endereço', 'address')}</Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>{field('Estado', 'state')}</Grid>
-            {editing && (
-              <>
-                <Grid size={{ xs: 12, sm: 6 }}>{field('E-mail', 'email')}</Grid>
-                <Grid size={{ xs: 12, sm: 6 }}>
-                  {field('Telefone', 'phone')}
-                </Grid>
-              </>
-            )}
+            <Grid size={{ xs: 12, sm: 6 }}>{field('E-mail', 'email')}</Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              {field('Data de Cadastro', 'registrationDate', true)}
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              {field('Tipo de Acesso', 'type')}
+              {editing ? (
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Tipo de Acesso</InputLabel>
+                  <Select
+                    value={form.role ?? ''}
+                    label="Tipo de Acesso"
+                    onChange={(e) =>
+                      setForm((prev) =>
+                        prev ? { ...prev, role: e.target.value as Role } : prev
+                      )
+                    }
+                  >
+                    <MenuItem value="ADMIN">Administrador</MenuItem>
+                    <MenuItem value="CONSULTANT">Consultor</MenuItem>
+                  </Select>
+                </FormControl>
+              ) : (
+                <TextField
+                  label="Tipo de Acesso"
+                  value={normalizeRoleView(form.role) ?? ''}
+                  disabled
+                  size="small"
+                  fullWidth
+                />
+              )}
             </Grid>
           </Grid>
 
@@ -286,7 +358,9 @@ const AccessControlSelectedUserForm = () => {
               >
                 <Button
                   variant="outlined"
-                  onClick={handleCancel}
+                  onClick={() => {
+                    setEditing(false);
+                  }}
                   sx={{
                     borderRadius: 10,
                     textTransform: 'none',
@@ -302,7 +376,7 @@ const AccessControlSelectedUserForm = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleSave}
-                  disabled={loading}
+                  disabled={saving}
                   sx={{
                     borderRadius: 10,
                     textTransform: 'none',
@@ -311,7 +385,7 @@ const AccessControlSelectedUserForm = () => {
                     width: { xs: '100%', sm: 'auto' },
                   }}
                 >
-                  {loading ? (
+                  {saving ? (
                     <CircularProgress size={20} color="inherit" />
                   ) : (
                     'Salvar Alterações'
