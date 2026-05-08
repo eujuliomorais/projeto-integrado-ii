@@ -47,7 +47,7 @@ public class SecurityConfiguration {
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 
                     req.requestMatchers(HttpMethod.POST, "/admins").hasRole("SUPER_ADMIN");
-                    req.requestMatchers(HttpMethod.POST, "/associates").hasAnyRole("ADMIN", "SUPER_ADMIN");
+                    req.requestMatchers(HttpMethod.POST, "/associates").hasRole("ADMIN");
                     req.requestMatchers("/management/**").hasAnyRole("SUPER_ADMIN");
                     req.anyRequest().authenticated();
                 })
