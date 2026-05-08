@@ -1,9 +1,20 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
+import { default as AccessControlCreatePage } from './pages/AccessControlCreatePage';
+import AccessControlLoginPage from './pages/AccessControlLoginPage';
+import AccessControlProfilePage from './pages/AccessControlProfilePage';
+import AccessControlSelectedUserPage from './pages/AccessControlSelectedUserPage';
+import { default as AccessControlTablePage } from './pages/AccessControlTablePage';
+import AssociateLoginPage from './pages/AssociateLoginPage';
+import ComingSoonPage from './pages/ComingSoonPage';
 import DashboardPage from './pages/DashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import LandingPage from './pages/LandingPage';
+import LandingValidatePage from './pages/LandingValidatePage';
 import LoginPage from './pages/LoginPage';
+import NotFoundPage from './pages/NotFoundPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import TokenPage from './pages/TokenPage';
 import PrivateRoute from './routes/PrivateRoute';
 
 function App() {
@@ -11,13 +22,51 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
+          {/* Públicas */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/validate" element={<LandingValidatePage />} />
+
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
+          <Route path="/login-associado" element={<AssociateLoginPage />} />
+          <Route path="/token-associado" element={<TokenPage />} />
+
+          <Route path="/login-controle" element={<AccessControlLoginPage />} />
+
+          <Route path="/dashboard" element={<DashboardPage />} />
+
+          <Route
+            path="/controle-de-acesso"
+            element={<AccessControlTablePage />}
+          />
+          <Route
+            path="/controle-de-acesso/novo"
+            element={<AccessControlCreatePage />}
+          />
+          <Route // pagina para usuario selecionado na tabela
+            path="/controle-de-acesso/:id"
+            element={<AccessControlSelectedUserPage />}
+          />
+          <Route // pagina para gerenciar proprio perfil
+            path="controle-de-acesso/meu-perfil"
+            element={<AccessControlProfilePage />}
+          />
+
+          {/* Privadas */}
           <Route element={<PrivateRoute />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/settings" element={<ComingSoonPage />} />
+            <Route path="/reports" element={<ComingSoonPage />} />
+            <Route path="/users" element={<ComingSoonPage />} />
+            <Route path="/membership-card" element={<ComingSoonPage />} />
           </Route>
+
+          {/* Não implementadas */}
+          <Route path="/futura" element={<ComingSoonPage />} />
+
+          {/* Inexistentes */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

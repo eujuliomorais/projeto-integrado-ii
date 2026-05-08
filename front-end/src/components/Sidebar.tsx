@@ -1,29 +1,121 @@
-import React from 'react';
+import {
+  Box,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
 
-export interface MenuItem {
+import type { ElementType } from 'react';
+
+import { Link, useLocation } from 'react-router-dom';
+
+export interface SidebarItem {
   label: string;
   href: string;
+  icon?: ElementType;
 }
 
 interface SidebarProps {
-  items: MenuItem[];
+  items: SidebarItem[];
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ items }) => {
+const Sidebar = ({ items }: SidebarProps) => {
+  const { pathname } = useLocation();
+
   return (
-    <aside className="w-64 bg-white shadow-md">
-      <nav className="flex flex-col p-4 space-y-2">
-        {items.map((item) => (
-          <a
-            key={item.href}
-            href={item.href}
-            className="text-gray-700 hover:bg-gray-200 p-2 rounded"
-          >
-            {item.label}
-          </a>
-        ))}
-      </nav>
-    </aside>
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        bgcolor: 'background.paper',
+      }}
+    >
+      {/* Logo */}
+      <Box
+        sx={{
+          p: 2.5,
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Box
+          component="img"
+          src="/grey-cultural-group-logo.png"
+          alt="Logotipo Cinza do Grupo Cultural"
+          sx={{
+            width: '100%',
+            maxHeight: 72,
+            objectFit: 'contain',
+          }}
+        />
+      </Box>
+
+      {/* Menu */}
+      <List sx={{ pt: 1.5, px: 1 }}>
+        {items.map((item) => {
+          const active = pathname.startsWith(item.href);
+
+          const Icon = item.icon;
+
+          return (
+            <ListItemButton
+              key={item.href}
+              component={Link}
+              to={item.href}
+              selected={active}
+              sx={{
+                borderRadius: 1.5,
+                mb: 0.5,
+
+                borderLeft: '3px solid',
+
+                borderColor: active ? 'primary.main' : 'transparent',
+
+                '&.Mui-selected': {
+                  bgcolor: 'custom.orange.light30',
+
+                  '&:hover': {
+                    bgcolor: 'custom.orange.light30',
+                  },
+                },
+
+                '&:hover': {
+                  bgcolor: 'grey.100',
+                },
+              }}
+            >
+              {Icon && (
+                <ListItemIcon
+                  sx={{
+                    minWidth: 36,
+
+                    color: active ? 'primary.main' : 'text.secondary',
+                  }}
+                >
+                  <Icon />
+                </ListItemIcon>
+              )}
+
+              <ListItemText
+                primary={item.label}
+                slotProps={{
+                  primary: {
+                    sx: {
+                      fontSize: 14,
+                      fontWeight: active ? 700 : 500,
+
+                      color: active ? 'primary.main' : 'text.secondary',
+                    },
+                  },
+                }}
+              />
+            </ListItemButton>
+          );
+        })}
+      </List>
+    </Box>
   );
 };
 
