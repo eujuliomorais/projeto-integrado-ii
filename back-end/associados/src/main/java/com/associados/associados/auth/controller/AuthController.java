@@ -1,6 +1,8 @@
 package com.associados.associados.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +19,10 @@ import com.associados.associados.auth.dtos.response.MessageResponseDto;
 import com.associados.associados.auth.service.AssociateAuthService;
 import com.associados.associados.auth.service.AuthService;
 import com.associados.associados.auth.service.PasswordRecoveryService;
+import com.associados.associados.user.dtos.response.UserResponseDto;
+import com.associados.associados.user.entity.User;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -64,5 +69,12 @@ public class AuthController {
     public ResponseEntity<LoginResponseDto> loginAssociate(@RequestBody @Valid LoginAssociateTokenDto data) {
         String token = associateAuthService.authenticateByToken(data.token());
         return ResponseEntity.ok(new LoginResponseDto(token, "Login successful!"));
+    }
+
+    @GetMapping("/profile")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<UserResponseDto> getAuthenticatedUser() {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return ResponseEntity.ok(new UserResponseDto(user));
     }
 }

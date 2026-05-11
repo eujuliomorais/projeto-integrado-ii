@@ -1,7 +1,6 @@
 package com.associados.associados.auth.infra.security;
 
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,12 +46,12 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    req.requestMatchers("/auth/**").permitAll();
+                    req.requestMatchers("/auth/login", "/auth/access-manager/login", "/auth/password/**", "/auth/magic-link/**").permitAll();
                     req.requestMatchers("/error/**").permitAll();
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 
                     req.requestMatchers(HttpMethod.POST, "/admins").hasRole("SUPER_ADMIN");
-                    req.requestMatchers(HttpMethod.POST, "/associates").hasAnyRole("ADMIN", "SUPER_ADMIN");
+                    req.requestMatchers(HttpMethod.POST, "/associates").hasRole("ADMIN");
                     req.requestMatchers("/management/**").hasAnyRole("SUPER_ADMIN");
                     req.anyRequest().authenticated();
                 })
