@@ -55,7 +55,11 @@ public record RegisterAssociateDto(
         EscolaridadeEnum education,
         RendaEnum income,
         String disability,
-        String additionalInfo
+        String additionalInfo,
+
+        @NotNull(message = "Legal guardian name is required for minors")
+        @Size(max = 255, message = "Legal guardian name must be at most 255 characters")
+        String legalGuardianName
 ) {
         public String email() {
                 return baseData.email();
