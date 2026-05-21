@@ -2,7 +2,9 @@ package com.associados.associados.auth.service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,8 +21,9 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.associados.associados.auth.dtos.request.ConfirmPasswordResetDto;
 import com.associados.associados.auth.dtos.request.ForgotPasswordRequestDto;
-import com.associados.associados.auth.dtos.request.ResetPasswordDto;
+import com.associados.associados.auth.dtos.request.ValidatePasswordTokenDto;
 import com.associados.associados.auth.entity.AuthToken;
 import com.associados.associados.auth.enums.TokenType;
 import com.associados.associados.auth.infra.exceptions.BusinessException;
@@ -43,6 +46,9 @@ class PasswordRecoveryServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JWTService jwtService;
 
     @InjectMocks
     private PasswordRecoveryService passwordRecoveryService;
@@ -97,18 +103,19 @@ class PasswordRecoveryServiceTest {
         assertThatThrownBy(() -> passwordRecoveryService.createPasswordResetToken(data))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("Associate access is performed via email token.");
-        
+
         verify(tokenRepository, never()).save(any());
     }
 
-    // reset password
+    // validatePasswordToken
 
     @Test
-    @DisplayName("Should reset password successfully when token is valid")
-    void testResetPasswordSuccess() {
+    @DisplayName("Should validate code successfully and return password reset JWT")
+    void testValidatePasswordTokenSuccess() {
 
-        ResetPasswordDto data = new ResetPasswordDto("123456", "newPassword123","newPassword123");
+        ValidatePasswordTokenDto data = new ValidatePasswordTokenDto("123456");
         User user = new User();
+
         AuthToken authToken = new AuthToken();
         authToken.setUser(user);
         authToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
@@ -116,21 +123,36 @@ class PasswordRecoveryServiceTest {
 
         when(tokenRepository.findByTokenAndType("123456", TokenType.FORGOT_PASSWORD))
                 .thenReturn(Optional.of(authToken));
-        when(passwordEncoder.encode(data.newPassword())).thenReturn("hashed_password");
+        when(jwtService.generatePasswordResetToken(authToken)).thenReturn("reset-jwt");
 
-        passwordRecoveryService.resetPassword(data);
+        String resetToken = passwordRecoveryService.validatePasswordToken(data);
 
-        verify(userRepository, times(1)).save(user);
-        verify(tokenRepository, times(1)).save(authToken);
-        assert(user.getPassword().equals("hashed_password"));
-        assert(authToken.isUsed());
+        assertThat(resetToken).isEqualTo("reset-jwt");
+        verify(userRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Should throw exception when token is already used")
-    void testResetPasswordTokenAlreadyUsed() {
+    @DisplayName("Should throw exception when token is expired during validation")
+    void testValidatePasswordTokenExpired() {
 
-        ResetPasswordDto data = new ResetPasswordDto("123456", "newPassword123","newPassword123");
+        ValidatePasswordTokenDto data = new ValidatePasswordTokenDto("123456");
+        AuthToken authToken = new AuthToken();
+        authToken.setExpiryDate(LocalDateTime.now().minusMinutes(1));
+        authToken.setUsed(false);
+
+        when(tokenRepository.findByTokenAndType("123456", TokenType.FORGOT_PASSWORD))
+                .thenReturn(Optional.of(authToken));
+
+        assertThatThrownBy(() -> passwordRecoveryService.validatePasswordToken(data))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Recovery token expired.");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when token is already used during validation")
+    void testValidatePasswordTokenAlreadyUsed() {
+
+        ValidatePasswordTokenDto data = new ValidatePasswordTokenDto("123456");
         AuthToken authToken = new AuthToken();
         authToken.setUsed(true);
         authToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
@@ -138,26 +160,119 @@ class PasswordRecoveryServiceTest {
         when(tokenRepository.findByTokenAndType("123456", TokenType.FORGOT_PASSWORD))
                 .thenReturn(Optional.of(authToken));
 
-        assertThatThrownBy(() -> passwordRecoveryService.resetPassword(data))
+        assertThatThrownBy(() -> passwordRecoveryService.validatePasswordToken(data))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Recovery token already used.");
+    }
+
+    // confirmPasswordReset
+
+    @Test
+    @DisplayName("Should reset password successfully when reset JWT is valid and passwords match")
+    void testConfirmPasswordResetSuccess() {
+
+        String email = "admin@test.com";
+        UUID authTokenId = UUID.randomUUID();
+        ConfirmPasswordResetDto data = new ConfirmPasswordResetDto("newPassword123", "newPassword123");
+        User user = new User();
+        user.setEmail(email);
+
+        AuthToken authToken = new AuthToken();
+        authToken.setId(authTokenId);
+        authToken.setUser(user);
+        authToken.setType(TokenType.FORGOT_PASSWORD);
+        authToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+        authToken.setUsed(false);
+
+        when(jwtService.validatePasswordResetToken("reset-jwt"))
+                .thenReturn(new JWTService.PasswordResetTokenData(email, authTokenId.toString()));
+        when(tokenRepository.findById(authTokenId)).thenReturn(Optional.of(authToken));
+        when(passwordEncoder.encode(data.newPassword())).thenReturn("hashed_password");
+
+        passwordRecoveryService.confirmPasswordReset("reset-jwt", data);
+
+        verify(userRepository, times(1)).save(user);
+        verify(tokenRepository, times(1)).save(authToken);
+        assertThat(user.getPassword()).isEqualTo("hashed_password");
+        assertThat(authToken.isUsed()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Should throw exception when passwords do not match")
+    void testConfirmPasswordResetPasswordMismatch() {
+
+        ConfirmPasswordResetDto data = new ConfirmPasswordResetDto("newPassword123", "differentPassword");
+
+        assertThatThrownBy(() -> passwordRecoveryService.confirmPasswordReset("reset-jwt", data))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Passwords do not match.");
+
+        verify(jwtService, never()).validatePasswordResetToken(anyString());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when token is already used during reset")
+    void testConfirmPasswordResetTokenAlreadyUsed() {
+
+        String email = "admin@test.com";
+        UUID authTokenId = UUID.randomUUID();
+        ConfirmPasswordResetDto data = new ConfirmPasswordResetDto("newPassword123", "newPassword123");
+        User user = new User();
+        user.setEmail(email);
+
+        AuthToken authToken = new AuthToken();
+        authToken.setId(authTokenId);
+        authToken.setUser(user);
+        authToken.setType(TokenType.FORGOT_PASSWORD);
+        authToken.setUsed(true);
+        authToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+
+        when(jwtService.validatePasswordResetToken("reset-jwt"))
+                .thenReturn(new JWTService.PasswordResetTokenData(email, authTokenId.toString()));
+        when(tokenRepository.findById(authTokenId)).thenReturn(Optional.of(authToken));
+
+        assertThatThrownBy(() -> passwordRecoveryService.confirmPasswordReset("reset-jwt", data))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("Recovery token already used.");
     }
 
     @Test
-    @DisplayName("Should throw exception when token is expired")
-    void testResetPasswordTokenExpired() {
+    @DisplayName("Should throw exception when token is expired during reset")
+    void testConfirmPasswordResetTokenExpired() {
 
-        ResetPasswordDto data = new ResetPasswordDto("123456", "password","password");
+        String email = "admin@test.com";
+        UUID authTokenId = UUID.randomUUID();
+        ConfirmPasswordResetDto data = new ConfirmPasswordResetDto("password", "password");
+        User user = new User();
+        user.setEmail(email);
+
         AuthToken authToken = new AuthToken();
+        authToken.setId(authTokenId);
+        authToken.setUser(user);
+        authToken.setType(TokenType.FORGOT_PASSWORD);
         authToken.setUsed(false);
-
         authToken.setExpiryDate(LocalDateTime.now().minusMinutes(1));
 
-        when(tokenRepository.findByTokenAndType("123456", TokenType.FORGOT_PASSWORD))
-                .thenReturn(Optional.of(authToken));
+        when(jwtService.validatePasswordResetToken("reset-jwt"))
+                .thenReturn(new JWTService.PasswordResetTokenData(email, authTokenId.toString()));
+        when(tokenRepository.findById(authTokenId)).thenReturn(Optional.of(authToken));
 
-        assertThatThrownBy(() -> passwordRecoveryService.resetPassword(data))
+        assertThatThrownBy(() -> passwordRecoveryService.confirmPasswordReset("reset-jwt", data))
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("Recovery token expired.");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when reset JWT is invalid")
+    void testConfirmPasswordResetInvalidResetJwt() {
+
+        ConfirmPasswordResetDto data = new ConfirmPasswordResetDto("newPassword123", "newPassword123");
+        when(jwtService.validatePasswordResetToken("invalid-jwt")).thenReturn(null);
+
+        assertThatThrownBy(() -> passwordRecoveryService.confirmPasswordReset("invalid-jwt", data))
+                .isInstanceOf(BusinessException.class)
+                .hasMessage("Recovery token invalid or expired.");
+
+        verify(userRepository, never()).save(any());
     }
 }

@@ -50,7 +50,7 @@ public class AuthToken {
 
     @Column(nullable = false)
     private boolean used = false;
-    
+
     public boolean isExpired() {
         return LocalDateTime.now().isAfter(this.expiryDate);
     }

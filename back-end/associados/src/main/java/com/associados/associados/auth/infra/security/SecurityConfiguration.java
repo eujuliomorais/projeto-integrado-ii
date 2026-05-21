@@ -42,12 +42,18 @@ public class SecurityConfiguration {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req -> {
-                    req.requestMatchers("/auth/login", "/auth/access-manager/login", "/auth/password/**", "/auth/magic-link/**").permitAll();
+                    req.requestMatchers("/auth/login", "/auth/access-manager/login", "/auth/magic-link/**").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/auth/password/forgot", "/auth/password/validate").permitAll();
+                    req.requestMatchers(HttpMethod.POST, "/auth/password/reset").hasAuthority("PASSWORD_RESET");
                     req.requestMatchers("/error/**").permitAll();
                     req.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll();
 
                     req.requestMatchers(HttpMethod.POST, "/admins").hasRole("SUPER_ADMIN");
                     req.requestMatchers(HttpMethod.POST, "/associates").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.GET, "/associates").hasAnyRole("ADMIN", "CONSULTANT");
+                    req.requestMatchers(HttpMethod.GET, "/associates/**").hasAnyRole("ADMIN", "CONSULTANT");
+                    req.requestMatchers(HttpMethod.PATCH, "/associates/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.DELETE, "/associates/**").hasRole("ADMIN");
                     req.requestMatchers("/management/**").hasAnyRole("SUPER_ADMIN");
                     req.anyRequest().authenticated();
                 })
