@@ -30,7 +30,6 @@ public class AssociateService {
     public void register(RegisterAssociateDto data) {
 
         validateCpf(data.cpf());
-        validateAge(data.birthDate());
         validateEmailNotAlreadyUsed(data.email());
 
         User newUser = new User();
@@ -63,6 +62,12 @@ public class AssociateService {
         Associate associate = new Associate();
         associate.setCpf(data.cpf());
         associate.setBirthDate(data.birthDate());
+        if(data.birthDate().isAfter(java.time.LocalDate.now().minusYears(18))) {
+            associate.setLegalGuardianName(data.legalGuardianName());
+        }
+        else {
+            associate.setLegalGuardianName("");
+        }
         associate.setWorkCategory(data.workCategory());
         associate.setPhone(data.phone());
         associate.setUser(newUser);
@@ -80,17 +85,6 @@ public class AssociateService {
             return;
         }
         throw new IllegalArgumentException("Invalid CPF format");
-    }
-
-    private void validateAge(java.time.LocalDate birthDate) {
-        if (birthDate == null) {
-            throw new IllegalArgumentException("Birth date is required");
-        }
-        java.time.LocalDate today = java.time.LocalDate.now();
-        int age = today.getYear() - birthDate.getYear();
-        if (age < 18) {
-            throw new IllegalArgumentException("Must be at least 18 years old to register");
-        }
     }
 
     private void validateEmailNotAlreadyUsed(String email) {

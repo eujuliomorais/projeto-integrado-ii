@@ -1,5 +1,6 @@
 package com.associados.associados.associate.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,4 +14,7 @@ public interface AssociateRepository extends JpaRepository<Associate, UUID> {
     Optional<Associate> findByCpf(String cpf);
     
     boolean existsByCpf(String cpf);
+
+    @Override
+    List<Associate> findAll();
 }

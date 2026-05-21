@@ -19,6 +19,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -59,6 +60,9 @@ public class Associate {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "declaration_id")
     private SelfDeclaration selfDeclaration;
+
+    @Size(max = 255, message = "Legal guardian name must be at most 255 characters")
+    private String legalGuardianName;
 
     public void validateSecurityConstraints() {
         if (user == null || !user.getRole().name().equals("ASSOCIATE")) {

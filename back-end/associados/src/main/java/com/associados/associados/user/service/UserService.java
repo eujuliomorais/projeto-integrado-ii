@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.associados.associados.associate.entity.Associate;
+import com.associados.associados.associate.repository.AssociateRepository;
 import com.associados.associados.auth.dtos.request.RegisterAdminDto;
 import com.associados.associados.user.dtos.response.UserResponseDto;
 import com.associados.associados.user.entity.User;
@@ -23,6 +25,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AssociateRepository associateRepository;
 
     public UserResponseDto createUser(RegisterAdminDto data) {
         if (userRepository.findByEmail(data.email()).isPresent()) {
@@ -86,6 +91,10 @@ public class UserService {
     private User findUserOrThrow(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    public List<Associate> getAllAssociates() {
+        return associateRepository.findAll();
     }
 }
 
