@@ -103,7 +103,7 @@ public class AssociateController {
         return ResponseEntity.ok(associate);
     }
 
-    @GetMapping("/{id}/ficha-cadastral")
+    @GetMapping("/{id}/registration-form")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Download Ficha Cadastral", description = "Gera e faz o download da ficha cadastral do associado em PDF")
     @ApiResponses({

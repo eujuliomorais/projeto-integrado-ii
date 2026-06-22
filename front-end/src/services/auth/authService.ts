@@ -158,7 +158,6 @@ export interface SendTokenRequest {
 export async function authSendToken({ email }: SendTokenRequest) {
   const res = await api.post('/auth/magic-link/request', { email });
 
-  console.log(res.data);
   return res.data;
 }
 

@@ -14,5 +14,5 @@ export async function adminFetchAssociates({
     },
   });
 
-  return res.data;
+  return res.data.content;
 }

@@ -149,3 +149,17 @@ export async function deleteCategory(
 
   return null;
 }
+
+export async function getAssociateRegistrationForm(
+  bearerToken: string,
+  id: string
+): Promise<Blob> {
+  const res = await api.get(`/associates/${id}/registration-form`, {
+    headers: {
+      Authorization: `Bearer ${bearerToken}`,
+    },
+    responseType: 'blob',
+  });
+
+  return res.data;
+}

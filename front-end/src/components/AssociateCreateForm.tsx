@@ -125,7 +125,6 @@ const AssociateCreateForm = () => {
 
   const handleCepBlur = async (zipCode: string) => {
     const cep = zipCode.replace('-', '');
-    console.log(cep);
 
     if (cep.length !== 8) return;
 
@@ -177,7 +176,6 @@ const AssociateCreateForm = () => {
         value = maskCEP(value);
 
         if (value.length >= 9) {
-          console.log('dentro do set: ', value);
           await handleCepBlur(value);
         }
       }
