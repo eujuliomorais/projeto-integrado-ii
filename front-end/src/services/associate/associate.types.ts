@@ -38,6 +38,7 @@ export interface IAssociateProfileForm {
   email: string;
   phone: string;
   birthDate: string;
+  guardianName: string;
   category: string; // UUID from categories table
   addressZipCode: string;
   addressState: string;
@@ -63,6 +64,7 @@ export interface IAdminAssociateProfileForm {
   phone: string;
   birthDate: string;
   category: string; // UUID from categories table
+  guardianName: string;
   addressZipCode: string;
   addressState: string;
   addressCity: string;
@@ -185,6 +187,7 @@ export interface UpdateAssociatePayload {
   phone?: string;
   workCategoryId?: string;
   availableHours?: DisponibilidadeHorarioEnum;
+  legalGuardianName?: string;
   fullName?: string;
   email?: string;
   postalCode?: string;

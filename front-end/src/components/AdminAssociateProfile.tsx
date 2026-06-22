@@ -88,6 +88,7 @@ const EMPTY: IAdminAssociateProfileForm = {
   phone: '',
   birthDate: '',
   category: '',
+  guardianName: '',
   availableHours: '',
   addressZipCode: '',
   addressState: '',
@@ -132,6 +133,26 @@ const AssociateProfile = () => {
     sexualOrientation: '',
   });
 
+  const isUnder18 = (() => {
+    if (!form.birthDate) return false;
+
+    const today = new Date();
+
+    const birth = new Date(form.birthDate);
+
+    let age = today.getFullYear() - birth.getFullYear();
+
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birth.getDate())
+    ) {
+      age--;
+    }
+
+    return age < 18;
+  })();
   // const [isActive, setIsActive] = useState<boolean>();
 
   const [errors, setErrors] = useState<
@@ -233,6 +254,10 @@ const AssociateProfile = () => {
 
     if (!form.fullName.trim()) {
       newErrors.fullName = 'Nome é obrigatório';
+    }
+
+    if (!form.guardianName?.trim()) {
+      newErrors.guardianName = 'Responsável legal é obrigatório';
     }
 
     if (!form.email.trim()) {
@@ -357,6 +382,7 @@ const AssociateProfile = () => {
 
       setSaving(true);
 
+      console.log(form.guardianName)
       await updateAssociate(
         token,
         id,
@@ -840,6 +866,12 @@ const AssociateProfile = () => {
             <Grid size={{ xs: 12, sm: 3 }}>
               {tf('Data de Nascimento', 'birthDate', 'date')}
             </Grid>
+
+            {isUnder18 && (
+              <Grid size={{ xs: 12, sm: 8 }}>
+                {tf('Nome do Responsável', 'guardianName')}
+              </Grid>
+            )}
 
             <Grid size={{ xs: 12, sm: 8 }}>
               {tf('E-mail', 'email', 'email')}

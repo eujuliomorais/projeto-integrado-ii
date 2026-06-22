@@ -21,6 +21,7 @@ export const mapAssociateResponseToForm = (
     phone: maskPhone(phone) ?? '',
     birthDate: associate.birthDate ?? '',
     category: associate.workCategory?.id ?? '',
+    guardianName: associate.legalGuardianName ?? '',
     availableHours:
       (associate.availableHours as AssociateProfileForm['availableHours']) ??
       '',
@@ -38,7 +39,8 @@ export const mapAssociateResponseToForm = (
     education:
       associate.selfDeclaration?.education === 'NÃO_SELECIONADO'
         ? ''
-        : (associate.selfDeclaration?.education as AssociateProfileForm['education']) ?? '',
+        : ((associate.selfDeclaration
+            ?.education as AssociateProfileForm['education']) ?? ''),
     income:
       associate.selfDeclaration?.income != null
         ? associate.selfDeclaration.income.toLocaleString('pt-BR', {
@@ -81,6 +83,7 @@ export const mapFormToUpdatePayload = (
   birthDate: form.birthDate || undefined,
   phone: form.phone || undefined,
   workCategoryId: form.category || undefined,
+  legalGuardianName: form.guardianName || '',
   availableHours:
     (form.availableHours as UpdateAssociatePayload['availableHours']) ||
     undefined,
@@ -104,7 +107,8 @@ export const mapFormToUpdatePayload = (
   // Filtra valores legados do banco que não existem mais no enum
   education:
     !form.education ||
-    (!VALID_EDUCATION.has(form.education) && form.education !== 'NÃO_SELECIONADO')
+    (!VALID_EDUCATION.has(form.education) &&
+      form.education !== 'NÃO_SELECIONADO')
       ? ('' as UpdateAssociatePayload['education'])
       : (form.education as UpdateAssociatePayload['education']),
   income: parseMaskedIncome(String(form.income ?? '')),
