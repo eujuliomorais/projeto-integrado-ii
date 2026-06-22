@@ -1,6 +1,6 @@
 import EditIcon from '@mui/icons-material/Edit';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import {
   Alert,
   Avatar,
@@ -10,7 +10,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   Divider,
   Grid,
@@ -22,13 +21,13 @@ import {
   Typography,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { authGetProfile } from '../services/auth/authService';
+import { normalizeRoleView } from '../services/auth/roles';
 import type { User } from '../services/user/user.types';
 import { updateOwnContact } from '../services/user/userService';
 import { maskCPF, maskPhone } from '../utils/masks.util';
 import ResetPasswordDialog from './ResetPasswordDialog';
-import { useAuth } from '../hooks/useAuth';
-import { authGetProfile } from '../services/auth/authService';
-import { normalizeRoleView } from '../services/auth/roles';
 
 interface AdminProfileForm {
   fullName: string;
@@ -169,7 +168,7 @@ const AdminProfileForm = () => {
     }
 
     if (!profile) return;
-    
+
     if (
       form.email.trim().toLocaleLowerCase() !==
       originalForm.email.trim().toLocaleLowerCase()
@@ -222,7 +221,11 @@ const AdminProfileForm = () => {
     }
   };
 
-  const f = (label: string, key: keyof AdminProfileForm, isAlwaysDisabled = false) => (
+  const f = (
+    label: string,
+    key: keyof AdminProfileForm,
+    isAlwaysDisabled = false
+  ) => (
     <TextField
       label={label}
       value={form[key]}
@@ -318,7 +321,9 @@ const AdminProfileForm = () => {
             </Stack>
           ) : (
             <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 12 }}>{f('Nome Completo', 'fullName', true)}</Grid>
+              <Grid size={{ xs: 12 }}>
+                {f('Nome Completo', 'fullName', true)}
+              </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>{f('Telefone', 'phone')}</Grid>
               <Grid size={{ xs: 12, sm: 6 }}>{f('CPF', 'cpf', true)}</Grid>
               <Grid size={{ xs: 12, sm: 6 }}>{f('E-mail', 'email')}</Grid>
@@ -412,6 +417,8 @@ const AdminProfileForm = () => {
       <ResetPasswordDialog
         open={resetOpen}
         onClose={() => setResetOpen(false)}
+        onSuccess={(msg) => setSnack({ open: true, severity: 'success', msg })}
+        onError={(msg) => setSnack({ open: true, severity: 'error', msg })}
       />
 
       <Snackbar
@@ -434,9 +441,9 @@ const AdminProfileForm = () => {
         onClose={() => setConfirmEmailOpen(false)}
         maxWidth="xs"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3, p: 1 } }}
+        slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
       >
-        <DialogTitle>
+        <DialogTitle component="div">
           <Stack direction="row" sx={{ alignItems: 'center' }} spacing={1.5}>
             <WarningAmberIcon color="warning" sx={{ fontSize: 28 }} />
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
@@ -446,9 +453,9 @@ const AdminProfileForm = () => {
         </DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary">
-            Você alterou o seu e-mail. Para sua segurança, se confirmar esta alteração, 
-            você será desconectado automaticamente e precisará fazer login novamente 
-            com o novo e-mail. Deseja continuar?
+            Você alterou o seu e-mail. Para sua segurança, se confirmar esta
+            alteração, você será desconectado automaticamente e precisará fazer
+            login novamente com o novo e-mail. Deseja continuar?
           </Typography>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
@@ -469,10 +476,19 @@ const AdminProfileForm = () => {
             onClick={performSave}
             variant="contained"
             color="primary"
-            sx={{ borderRadius: 10, textTransform: 'none', fontWeight: 600, px: 3 }}
+            sx={{
+              borderRadius: 10,
+              textTransform: 'none',
+              fontWeight: 600,
+              px: 3,
+            }}
             disabled={saving}
           >
-            {saving ? <CircularProgress size={20} color="inherit" /> : 'Confirmar e Sair'}
+            {saving ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              'Confirmar e Sair'
+            )}
           </Button>
         </DialogActions>
       </Dialog>

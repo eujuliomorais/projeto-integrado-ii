@@ -128,7 +128,7 @@ export async function activateUser(token: string, id: string) {
   const res = await api.patch(
     `/management/users/${id}/active`,
     { active: true },
-    { headers: { Authrization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } }
   );
 
   return res.data;
@@ -138,7 +138,29 @@ export async function inactivateUser(token: string, id: string) {
   const res = await api.patch(
     `/management/users/${id}/active`,
     { active: false },
-    { headers: { Authrization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return res.data;
+}
+
+export interface selfPasswordUpdateReq {
+  token: string;
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+export async function adminOrConsultantSelfPasswordUpdate({
+  token,
+  confirmPassword,
+  currentPassword,
+  newPassword,
+}: selfPasswordUpdateReq) {
+  const res = await api.patch(
+    `/management/users/me/password`,
+    { currentPassword, newPassword, confirmPassword },
+    { headers: { Authorization: `Bearer ${token}` } }
   );
 
   return res.data;
