@@ -18,6 +18,7 @@ import com.associados.associados.associate.repository.AssociateRepository;
 import com.associados.associados.associate.repository.CategoryRepository;
 import com.associados.associados.auth.dtos.request.RegisterAssociateDto;
 import com.associados.associados.auth.infra.exceptions.BusinessException;
+import com.associados.associados.auth.repository.AuthTokenRepository;
 import com.associados.associados.card.service.CardService;
 import com.associados.associados.user.entity.User;
 import com.associados.associados.user.enums.RoleEnum;
@@ -34,6 +35,7 @@ public class AssociateService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final CardService cardService;
+    private final AuthTokenRepository authTokenRepository;
 
     @Transactional
     public void register(RegisterAssociateDto data) {
@@ -258,8 +260,9 @@ public class AssociateService {
     @Transactional
     public void deleteAssociate(java.util.UUID id) {
         Associate associate = findAssociateOrThrow(id);
-        
+
         cardService.deleteByAssociateId(associate.getId());
+        authTokenRepository.deleteByUser(associate.getUser());
 
         associateRepository.deleteById(id);
     }
