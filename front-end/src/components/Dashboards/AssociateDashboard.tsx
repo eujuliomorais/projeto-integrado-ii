@@ -1,3 +1,4 @@
+import axios from "axios";
 import DownloadIcon from '@mui/icons-material/Download';
 import PersonAddAlt1Icon from '@mui/icons-material/PersonAddAlt1';
 import {
@@ -120,11 +121,24 @@ const AssociateDashboard = () => {
       window.URL.revokeObjectURL(url);
 
       toast('success', 'Carteirinha baixada com sucesso.');
-    } catch {
-      toast(
-        'error',
-        'Não foi possível gerar a carteirinha devido a um erro no servidor.'
-      );
+    } catch (error) {
+      let strError = 'Não foi possível gerar a carteirinha devido a um erro no servidor.';
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data instanceof Blob) {
+          try {
+            const text = await error.response.data.text();
+            const json = JSON.parse(text);
+            strError = json.message || error.message;
+          } catch {
+            strError = error.message;
+          }
+        } else {
+          strError = error.response?.data?.message ?? error.message;
+        }
+      } else if (error instanceof Error) {
+        strError = error.message;
+      }
+      toast('error', strError);
     }
   };
 
