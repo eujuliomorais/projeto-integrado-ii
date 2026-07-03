@@ -344,7 +344,7 @@ const AssociateCreateForm = () => {
         state: form.addressState,
         legalGuardianName: isUnder18 ? form.guardianName : '',
 
-        acceptedDataSharingTerm: true,
+        acceptedDataSharingTerm: false,
       });
 
       setSnack({
