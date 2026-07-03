@@ -138,6 +138,7 @@ export interface AssociateResponse {
   };
   availableHours?: DisponibilidadeHorarioEnum;
   status?: AssociateStatus;
+  cardNumber?: string;
 }
 
 export interface AssociatePageableResponse {

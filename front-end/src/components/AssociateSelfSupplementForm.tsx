@@ -1,5 +1,5 @@
 import EditIcon from '@mui/icons-material/Edit';
-import PersonIcon from '@mui/icons-material/Person';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import {
   Alert,
   Avatar,
@@ -452,11 +452,11 @@ const AssociateSelfSupplementForm = () => {
               sx={{
                 width: { xs: 120, sm: 160 },
                 height: { xs: 120, sm: 160 },
-                bgcolor: 'secondary.main',
+                bgcolor: 'primary.main',
               }}
             >
-              <PersonIcon
-                sx={{ fontSize: { xs: 80, sm: 110 }, color: 'rgba(0,0,0,0.3)' }}
+              <PersonOutlineIcon
+                sx={{ fontSize: { xs: 80, sm: 110 }, color: '#ffffff' }}
               />
             </Avatar>
 
@@ -489,9 +489,14 @@ const AssociateSelfSupplementForm = () => {
             <Box sx={{ mt: 0.5 }}>
               <Chip
                 label={profile.status}
-                color={profile.status === 'Ativo' ? 'success' : 'error'}
-                size="small"
-                sx={{ fontWeight: 600 }}
+                sx={{
+                  bgcolor: profile.status === 'Ativo' ? '#8FA882' : '#9E9E9E',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  height: 26,
+                  width: 80,
+                }}
               />
             </Box>
           )}

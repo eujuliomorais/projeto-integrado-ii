@@ -4,12 +4,13 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Toolbar,
 } from '@mui/material';
 
 import type { ElementType } from 'react';
 
 import { Link, useLocation } from 'react-router-dom';
-
+import LogoCinza from '../assets/logo-cinza.svg';
 export interface SidebarItem {
   label: string;
   href: string;
@@ -32,10 +33,35 @@ const Sidebar = ({ items }: SidebarProps) => {
         bgcolor: 'background.paper',
       }}
     >
-
+      <Toolbar sx={{ display: { xs: 'block', md: 'none' } }} />
+      {/* Top Logo (Desktop Only) */}
+      <Box
+        component={Link}
+        to="/associado/dashboard"
+        sx={{
+          pt: 4,
+          pb: 3,
+          pl: 2,
+          pr: 1,
+          display: { xs: 'none', md: 'block' },
+          textDecoration: 'none',
+        }}
+      >
+        <Box
+          component="img"
+          src={LogoCinza}
+          alt="Logo SIGA"
+          sx={{
+            height: 90,
+            width: '100%',
+            objectFit: 'contain',
+            objectPosition: 'left center',
+          }}
+        />
+      </Box>
 
       {/* Menu */}
-      <List sx={{ pt: 9, px: 1 }}>
+      <List sx={{ pt: 1, px: 1 }}>
         {items.map((item) => {
           const active = pathname.startsWith(item.href);
 
@@ -97,6 +123,30 @@ const Sidebar = ({ items }: SidebarProps) => {
           );
         })}
       </List>
+
+      {/* Bottom Logo*/}
+      <Box
+        component={Link}
+        to="/associado/dashboard"
+        sx={{
+          mt: 'auto',
+          p: 3,
+          display: { xs: 'flex', md: 'none' },
+          justifyContent: 'center',
+          textDecoration: 'none',
+        }}
+      >
+        <Box
+          component="img"
+          src={LogoCinza}
+          alt="Logo SIGA"
+          sx={{
+            height: 100,
+            width: 'auto',
+            objectFit: 'contain',
+          }}
+        />
+      </Box>
     </Box>
   );
 };

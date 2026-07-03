@@ -5,12 +5,12 @@ import type { SidebarItem } from '../../components/Sidebar';
 export const consultantItems: SidebarItem[] = [
   {
     label: 'Associados',
-    href: '/associados',
+    href: '/admin/associados',
     icon: GroupOutlinedIcon,
   },
   {
     label: 'Meu Perfil',
-    href: '/meu-perfil',
+    href: '/admin/meu-perfil',
     icon: PersonOutlined,
   },
 ];

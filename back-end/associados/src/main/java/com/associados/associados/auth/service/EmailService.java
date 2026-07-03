@@ -32,15 +32,16 @@ public class EmailService {
     private MessageService messageService;
 
     public void sendPasswordResetEmail(String to, String token) {
-        String subject = "Password Recovery - Associates System";
-        String body = "Hello!\n\nYour password recovery code is: " + token + "\n\nThis code expires in 15 minutes.";
+        String subject = "Recuperação de Senha - Grupo Cultural de Dom Maurício";
+        String body = "Olá!\n\nSeu código para recuperação de senha é: " + token +
+                    "\n\nEste código expira em 15 minutos.";
         sendEmail(to, subject, body);
     }
 
     public void sendAssociateLoginEmail(String email, String token) {
-        String subject = "Your Access Code - Associates Portal";
-        String body = "Use the following code to access the system: " + token + 
-                    "\nThis code expires in 10 minutes.";
+        String subject = "Seu Código de Acesso - Grupo Cultural de Dom Maurício";
+        String body = "Utilize o código abaixo para acessar o sistema: " + token +
+                    "\n\nEste código expira em 10 minutos.";
         sendEmail(email, subject, body);
     }
 
@@ -121,7 +122,7 @@ public class EmailService {
                     + "                                " + personalizedMessage + "" 
                     + "                            </p>"
                     + "                            <p style=\"color: #1a1a1a !important; font-size: 15px; margin-bottom: 0;\">"
-                    + "                                Att.,<br><strong>O Grupo Cultural de Dom Maurício</strong>"
+                    + "                                Att.,<br><strong>Grupo Cultural de Dom Maurício</strong>"
                     + "                            </p>"
                     + "                        </td>"
                     + "                    </tr>"

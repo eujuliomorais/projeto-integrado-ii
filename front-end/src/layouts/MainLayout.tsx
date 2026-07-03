@@ -76,7 +76,11 @@ const UserMenu = () => {
           setUserAvatar(avatarUrl ? `${api_base_url}${avatarUrl}` : '');
         }
 
-        setDisplayName(user.name?.split(' ')[0] ?? 'Usuário');
+        setDisplayName(
+          rawRole === 'SUPER_ADMIN'
+            ? 'Grupo Cultural Dom Maurício'
+            : (user.name?.split(' ')[0] ?? 'Usuário')
+        );
         setRole(normalizeRoleView(user.role));
         setRawRole(user.role);
       } catch {
@@ -85,7 +89,7 @@ const UserMenu = () => {
     };
 
     loadUserInfo();
-  }, [token, logout]);
+  }, [token, logout, rawRole]);
 
   const handleLogout = () => {
     setAnchor(null);
@@ -144,9 +148,9 @@ const UserMenu = () => {
           onClick={() => {
             setAnchor(null);
             if (rawRole === 'ASSOCIATE') {
-              navigate('/meu-cadastro');
+              navigate('/associado/meu-cadastro');
             } else if (rawRole === 'CONSULTANT' || rawRole === 'ADMIN') {
-              navigate('/meu-perfil');
+              navigate('/admin/meu-perfil');
             } else if (rawRole === 'SUPER_ADMIN') {
               navigate('/controle-de-acesso/meu-perfil');
             }
@@ -332,7 +336,7 @@ const MainLayout = ({ children, menuItems, pageTitle }: MainLayoutProps) => {
                 <Button
                   color="inherit"
                   size="small"
-                  onClick={() => navigate('/configuracoes')}
+                  onClick={() => navigate('/admin/configuracoes')}
                 >
                   Configurar
                 </Button>
@@ -354,7 +358,7 @@ const MainLayout = ({ children, menuItems, pageTitle }: MainLayoutProps) => {
                 <Button
                   color="inherit"
                   size="small"
-                  onClick={() => navigate('/configuracoes')}
+                  onClick={() => navigate('/admin/configuracoes')}
                 >
                   Configurar
                 </Button>

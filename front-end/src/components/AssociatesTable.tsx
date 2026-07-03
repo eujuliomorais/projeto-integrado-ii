@@ -1,7 +1,7 @@
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import FilterListIcon from '@mui/icons-material/FilterList';
-import PersonIcon from '@mui/icons-material/Person';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import SearchIcon from '@mui/icons-material/Search';
 import {
   Avatar,
@@ -214,14 +214,18 @@ const AssociatesTable = () => {
   }, []);
 
   const filtered = users.filter((u) => {
-    const name = (u.user?.name ?? '').toLowerCase();
+    const searchTerm = search.trim().toLowerCase();
 
+    const name = (u.user?.name ?? '').toLowerCase();
     const cpf = u.cpf ?? '';
+    const cardNumber = String(u.cardNumber ?? '');
 
     const status = u.user?.active ? 'Ativo' : 'Inativo';
 
     const matchSearch =
-      name.includes(search.toLowerCase()) || cpf.includes(search);
+      name.includes(searchTerm) ||
+      cpf.includes(searchTerm) ||
+      cardNumber.includes(searchTerm);
 
     const matchStatus = filters.status === 'Todos' || status === filters.status;
 
@@ -290,7 +294,7 @@ const AssociatesTable = () => {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => navigate('/associados/novo')}
+            onClick={() => navigate('/admin/associados/novo')}
             sx={{
               fontWeight: 600,
               borderRadius: 10,
@@ -322,7 +326,7 @@ const AssociatesTable = () => {
 
       {/* Search */}
       <TextField
-        placeholder="Pesquise um associado"
+        placeholder="Pesquise por nome, CPF ou número do associado"
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
@@ -356,7 +360,7 @@ const AssociatesTable = () => {
           <Table>
             <TableHead>
               <TableRow sx={{ bgcolor: 'background.paper' }}>
-                {['NOME', 'CPF', 'CATEGORIA', 'STATUS'].map((h) => (
+                {['NOME', 'CPF', 'CATEGORIA', 'STATUS', 'Nº'].map((h) => (
                   <TableCell
                     key={h}
                     sx={{
@@ -426,7 +430,7 @@ const AssociatesTable = () => {
                     <TableRow
                       key={u.id}
                       hover
-                      onClick={() => navigate(`/associados/${u.id}`)}
+                      onClick={() => navigate(`/admin/associados/${u.id}`)}
                       sx={{
                         cursor: 'pointer',
                         bgcolor:
@@ -447,9 +451,15 @@ const AssociatesTable = () => {
                                 ? `${api_base_url}${u.user.avatarUrl}`
                                 : undefined
                             }
-                            sx={{ width: 52, height: 52, bgcolor: 'grey.500' }}
+                            sx={{
+                              width: 52,
+                              height: 52,
+                              bgcolor: 'primary.main',
+                            }}
                           >
-                            <PersonIcon sx={{ color: '#fff', fontSize: 34 }} />
+                            <PersonOutlineIcon
+                              sx={{ color: '#ffffff', fontSize: 34 }}
+                            />
                           </Avatar>
 
                           <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -482,6 +492,11 @@ const AssociatesTable = () => {
                             borderRadius: 1,
                           }}
                         />
+                      </TableCell>
+                      <TableCell sx={{ py: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          {u.cardNumber ?? '-'}
+                        </Typography>
                       </TableCell>
                     </TableRow>
                   );

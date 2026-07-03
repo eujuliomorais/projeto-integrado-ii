@@ -1,21 +1,81 @@
-MIT License
+LICENÇA PROPRIETÁRIA
 
-Copyright (c) 2026 Julio Morais
+Copyright (c) 2026 Grupo Cultural de Dom Maurício. Todos os direitos reservados.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Este software é de propriedade exclusiva do Grupo Cultural de Dom Maurício e seus
+desenvolvedores. É protegido por leis de direitos autorais e tratados internacionais.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+TERMOS E RESTRIÇÕES
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+1. É expressamente proibida a cópia, reprodução, distribuição, modificação,
+   engenharia reversa, descompilação ou qualquer outra forma de utilização deste
+   software, no todo ou em parte, sem autorização prévia e expressa por escrito
+   dos detentores dos direitos autorais.
+
+2. É proibida a sublicença, venda, aluguel, empréstimo ou qualquer forma de
+   transferência deste software a terceiros sem consentimento prévio e expresso
+   dos detentores dos direitos autorais.
+
+3. O código-fonte, a documentação técnica e todos os ativos visuais que compõem
+   este software são confidenciais e não podem ser divulgados a terceiros.
+
+4. O uso deste software é restrito exclusivamente ao Grupo Cultural de Dom
+   Maurício e aos membros autorizados da equipe de desenvolvimento.
+
+ISENÇÃO DE GARANTIA
+
+ESTE SOFTWARE É FORNECIDO "NO ESTADO EM QUE SE ENCONTRA", SEM GARANTIAS DE
+QUALQUER TIPO, EXPRESSAS OU IMPLÍCITAS, INCLUINDO, MAS NÃO SE LIMITANDO A,
+GARANTIAS DE COMERCIALIZAÇÃO, ADEQUAÇÃO A UM FIM ESPECÍFICO E NÃO VIOLAÇÃO.
+
+LIMITAÇÃO DE RESPONSABILIDADE
+
+EM NENHUMA HIPÓTESE OS DETENTORES DOS DIREITOS AUTORAIS SERÃO RESPONSÁVEIS POR
+QUAISQUER DANOS DIRETOS, INDIRETOS, INCIDENTAIS, ESPECIAIS, EXEMPLARES OU
+CONSEQUENTES DECORRENTES DO USO OU DA IMPOSSIBILIDADE DE USO DESTE SOFTWARE.
+
+O uso não autorizado deste software constitui violação de direitos autorais e está
+sujeito às penalidades previstas na Lei n. 9.610/1998 e demais legislações
+brasileiras aplicáveis.
+
+---
+
+PROPRIETARY LICENSE
+
+Copyright (c) 2026 Grupo Cultural de Dom Mauricio. All rights reserved.
+
+This software is the exclusive property of Grupo Cultural de Dom Mauricio and its
+developers. It is protected by copyright laws and international treaties.
+
+TERMS AND RESTRICTIONS
+
+1. The copying, reproduction, distribution, modification, reverse engineering,
+   decompilation, or any other form of use of this software, in whole or in part,
+   is expressly prohibited without the prior and express written authorization of
+   the copyright holders.
+
+2. Sublicensing, selling, renting, lending, or any form of transfer of this
+   software to third parties is prohibited without the prior and express consent
+   of the copyright holders.
+
+3. The source code, technical documentation, and all visual assets comprising
+   this software are confidential and may not be disclosed to third parties.
+
+4. The use of this software is strictly restricted to Grupo Cultural de Dom
+   Mauricio and authorized members of the development team.
+
+DISCLAIMER OF WARRANTY
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE
+USE OR INABILITY TO USE THIS SOFTWARE.
+
+Unauthorized use of this software constitutes copyright infringement and is
+subject to the penalties provided in the Brazilian Law No. 9.610/1998 and
+other applicable laws.

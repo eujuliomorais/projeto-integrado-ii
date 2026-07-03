@@ -45,7 +45,7 @@ const theme = createTheme({
   palette: {
     primary: { main: '#E36D3B', contrastText: '#FFFFFF' },
     secondary: { main: '#AF8D00', contrastText: '#FFFFFF' },
-    background: { default: '#FFF8F0', paper: '#FFFFFF' },
+    background: { default: '#FFFFFF', paper: '#FFFFFF' },
     error: { main: '#D32F2F' },
     success: { main: '#53825A' },
     warning: { main: '#AF8D00' },

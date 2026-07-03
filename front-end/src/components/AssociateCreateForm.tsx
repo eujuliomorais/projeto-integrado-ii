@@ -344,7 +344,7 @@ const AssociateCreateForm = () => {
         state: form.addressState,
         legalGuardianName: isUnder18 ? form.guardianName : '',
 
-        acceptedDataSharingTerm: true,
+        acceptedDataSharingTerm: false,
       });
 
       setSnack({
@@ -353,7 +353,7 @@ const AssociateCreateForm = () => {
         msg: 'Associado cadastrado com sucesso!',
       });
 
-      setTimeout(() => navigate('/associados'), 1500);
+      setTimeout(() => navigate('/admin/associados'), 1500);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
@@ -471,7 +471,7 @@ const AssociateCreateForm = () => {
         {/* Voltar */}
         <Button
           startIcon={<ArrowBackIcon sx={{ fontSize: 18 }} />}
-          onClick={() => navigate('/associados')}
+          onClick={() => navigate('/admin/associados')}
           sx={{
             alignSelf: 'flex-start',
             color: 'text.secondary',
@@ -664,7 +664,7 @@ const AssociateCreateForm = () => {
           >
             <Button
               variant="contained"
-              onClick={() => navigate('/associados')}
+              onClick={() => navigate('/admin/associados')}
               sx={{
                 bgcolor: 'grey.300',
                 color: 'text.primary',

@@ -1,5 +1,6 @@
 import { ArrowBackIos } from '@mui/icons-material';
 import MailOutlineIcon from '@mui/icons-material/MailOutlined';
+import LogoLaranja from '../assets/logo-laranja3.svg';
 import {
   Backdrop,
   Box,
@@ -75,6 +76,17 @@ const ForgotPasswordForm = () => {
         sx={{ width: '100%' }}
       >
         <Stack spacing={3} sx={{ alignItems: 'center' }}>
+          <Box
+            component="img"
+            src={LogoLaranja}
+            alt="logo-SIGA"
+            sx={{
+              height: { xs: 80, sm: 100, md: 130 },
+              width: 'auto',
+              objectFit: 'contain',
+              alignSelf: 'center',
+            }}
+          />
           <Typography
             sx={{
               color: 'text.secondary',

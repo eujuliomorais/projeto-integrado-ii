@@ -4,12 +4,12 @@ import type { SidebarItem } from '../../components/Sidebar';
 export const associateItems: SidebarItem[] = [
   {
     label: 'Inicio',
-    href: '/dashboard',
+    href: '/associado/dashboard',
     icon: Home,
   },
   {
     label: 'Meu Cadastro',
-    href: '/meu-cadastro',
+    href: '/associado/meu-cadastro',
     icon: Person,
   },
 ];

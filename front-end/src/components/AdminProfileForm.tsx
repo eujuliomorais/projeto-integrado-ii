@@ -366,12 +366,12 @@ const AdminProfileForm = () => {
             >
               <Avatar
                 src={avatarPreview || avatarUrl}
-                sx={{ width: 100, height: 100, bgcolor: 'primary.light' }}
+                sx={{ width: 100, height: 100, bgcolor: 'primary.main' }}
               >
                 {/* O ícone só aparece se não tiver src ou preview */}
                 {!(avatarPreview || avatarUrl) && (
                   <PersonOutlineIcon
-                    sx={{ fontSize: 64, color: 'primary.main' }}
+                    sx={{ fontSize: 64, color: '#ffffff' }}
                   />
                 )}
               </Avatar>

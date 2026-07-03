@@ -8,12 +8,14 @@ import {
   Stack,
   TextField,
   Typography,
+  Snackbar,
+  Alert,
+  Fade,
 } from '@mui/material';
 import { useState } from 'react';
 import { api_base_url } from '../../services/api';
 import { validateCard } from '../../services/cardService';
 import { convertToForm } from '../../utils/dates.util';
-import ValidationResultModal from './ValidationResultModal';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlined'
 
 interface CardResult {
@@ -30,8 +32,15 @@ const ValidateCardSection = () => {
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CardResult | null>(null);
-  const [errorOpen, setErrorOpen] = useState(false);
-  const [errorMsg, setErrorMsg] = useState('');
+  const [snack, setSnack] = useState<{
+    open: boolean;
+    severity: 'success' | 'error';
+    msg: string;
+  }>({ open: false, severity: 'success', msg: '' });
+
+  const toast = (severity: 'success' | 'error', msg: string) => {
+    setSnack({ open: true, severity, msg });
+  };
 
   const handleValidate = async () => {
     if (!code.trim()) return;
@@ -50,16 +59,24 @@ const ValidateCardSection = () => {
         };
 
         setResult(cardResult);
+        toast('success', 'Carteirinha encontrada com sucesso!');
       } else {
-        setErrorMsg(data?.message || 'Carteirinha não encontrada.');
-        setErrorOpen(true);
+        let errorMsg = data?.message || 'Carteirinha não encontrada.';
+        if (errorMsg.includes('Card not found')) {
+          errorMsg = 'Carteirinha não encontrada.';
+        }
+        toast('error', errorMsg);
       }
     } catch (err: unknown) {
-      const msg =
+      let msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data
           ?.message ?? 'Não foi possível validar. Tente novamente.';
-      setErrorMsg(msg);
-      setErrorOpen(true);
+      
+      if (msg === 'Card not found') {
+        msg = 'Carteirinha não encontrada.';
+      }
+      
+      toast('error', msg);
     } finally {
       setLoading(false);
     }
@@ -70,168 +87,169 @@ const ValidateCardSection = () => {
     setCode('');
   };
 
-  /* ── Resultado inline ── */
-  if (result) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 2.5,
-        }}
-      >
-        {/* Título */}
-        <Stack direction="row" sx={{ alignItems: 'center' }} spacing={1}>
-          <CheckCircleIcon color="success" sx={{ fontSize: 28 }} />
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: 700 }}
-            color="primary.main"
+  /* ── Renderização ── */
+  return (
+    <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, position: 'relative' }}>
+      <Box sx={{ position: 'absolute', top: { xs: -100, sm: -80 }, width: '100%', maxWidth: 480, zIndex: 10 }}>
+        <Fade in={snack.open}>
+          <Alert
+            onClose={() => setSnack((prev) => ({ ...prev, open: false }))}
+            severity={snack.severity}
+            variant="filled"
+            sx={{ width: '100%', borderRadius: 2, fontWeight: 600, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
           >
-            Carteirinha Válida
-          </Typography>
-        </Stack>
+            {snack.msg}
+          </Alert>
+        </Fade>
+      </Box>
 
-        {/* Card de resultado */}
+      {result ? (
+        /* ── Resultado inline ── */
         <Box
           sx={{
-            border: '1px solid',
-            borderColor: 'divider',
-            borderRadius: 2,
-            p: 3,
-            width: '100%',
-            maxWidth: 400,
             display: 'flex',
-            alignItems: 'flex-start',
-            gap: 2,
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 4,
+            width: '100%',
+            px: 2,
           }}
         >
-          <Avatar
-            src={
-              result.avatarUrl
-                ? `${api_base_url}${result.avatarUrl}`
-                : undefined
-            }
+          {/* Card de resultado */}
+          <Box
             sx={{
-              width: 52,
-              height: 52,
-              bgcolor: 'success.main',
-              fontWeight: 700,
-              fontSize: 22,
-              flexShrink: 0,
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: 3,
+              p: 4,
+              width: '100%',
+              maxWidth: 480,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 3,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              bgcolor: '#ffffff',
             }}
           >
-            <PersonOutlineIcon sx={{ fontSize: 64, color: 'primary.main' }} />
-          </Avatar>
-
-          <Stack spacing={0.5} sx={{ flex: 1 }}>
-            <Typography sx={{ fontWeight: 700 }}>
-              {result.socialName ?? result.fullName}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Categoria: {result.category}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Numeração: {result.number}
-            </Typography>
-
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{ pt: 0.5, flexWrap: 'wrap' }}
+            <Avatar
+              src={
+                result.avatarUrl
+                  ? `${api_base_url}${result.avatarUrl}`
+                  : undefined
+              }
+              sx={{
+                width: 80,
+                height: 80,
+                bgcolor: 'primary.main',
+                fontWeight: 700,
+                fontSize: 28,
+                flexShrink: 0,
+                border: '2px solid',
+                borderColor: 'primary.light',
+              }}
             >
-              <Chip
-                label={result.valid}
-                size="small"
-                sx={{
-                  bgcolor: 'success.main',
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 11,
-                }}
-              />
-              <Chip
-                label={`Validade: ${convertToForm(result.validity)}`}
-                size="small"
-                color="primary"
-                sx={{ fontWeight: 700, fontSize: 11 }}
-              />
+              {!result.avatarUrl && <PersonOutlineIcon sx={{ fontSize: 48, color: '#fff' }} />}
+            </Avatar>
+
+            <Stack spacing={1} sx={{ flex: 1 }}>
+              <Typography sx={{ fontWeight: 800, fontSize: '1.3rem', lineHeight: 1.2 }}>
+                {result.socialName !== '—' ? result.socialName : result.fullName}
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Categoria: {result.category}
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                Numeração: {result.number}
+              </Typography>
+
+              <Stack
+                direction="row"
+                spacing={1}
+                sx={{ pt: 1, flexWrap: 'wrap', gap: 1 }}
+              >
+                <Chip
+                  label={result.valid}
+                  sx={{
+                    bgcolor: 'success.main',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 13,
+                    px: 1,
+                  }}
+                />
+                <Chip
+                  label={`Validade: ${convertToForm(result.validity)}`}
+                  color="primary"
+                  sx={{ fontWeight: 700, fontSize: 13 }}
+                />
+              </Stack>
             </Stack>
-          </Stack>
+          </Box>
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleReset}
+            sx={{
+              borderRadius: 10,
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 4,
+              py: 1.5,
+            }}
+          >
+            Nova Verificação
+          </Button>
         </Box>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleReset}
+      ) : (
+        /* ── Formulário ── */
+        <Box
           sx={{
-            borderRadius: 10,
-            textTransform: 'none',
-            fontWeight: 700,
-            px: 4,
-            py: 1.5,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 8,
           }}
         >
-          Nova Verificação
-        </Button>
-      </Box>
-    );
-  }
+          <Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center' }}>
+            Validação da Carteirinha
+          </Typography>
 
-  /* ── Formulário ── */
-  return (
-    <>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 8,
-        }}
-      >
-        <Typography variant="h5" sx={{ fontWeight: 700, textAlign: 'center' }}>
-          Validação da Carteirinha
-        </Typography>
+          <TextField
+            label="Numeração da Carteirinha"
+            placeholder="Digite a numeração da carteirinha"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleValidate()}
+            size="small"
+            sx={{ width: { xs: '100%', sm: 320 } }}
+            slotProps={{ inputLabel: { shrink: true } }}
+          />
 
-        <TextField
-          label="Numeração da Carteirinha"
-          placeholder="Digite a numeração da carteirinha"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleValidate()}
-          size="small"
-          sx={{ width: { xs: '100%', sm: 320 } }}
-          slotProps={{ inputLabel: { shrink: true } }}
-        />
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleValidate}
-          disabled={loading || !code.trim()}
-          sx={{
-            borderRadius: 10,
-            textTransform: 'none',
-            fontWeight: 700,
-            px: 5,
-            py: 1.5,
-          }}
-        >
-          {loading ? (
-            <CircularProgress size={20} color="inherit" />
-          ) : (
-            'Verificar'
-          )}
-        </Button>
-      </Box>
-
-      <ValidationResultModal
-        open={errorOpen}
-        onClose={() => setErrorOpen(false)}
-        message={errorMsg}
-      />
-    </>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleValidate}
+            disabled={loading || !code.trim()}
+            sx={{
+              borderRadius: 10,
+              textTransform: 'none',
+              fontWeight: 700,
+              px: 5,
+              py: 1.5,
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              'Verificar'
+            )}
+          </Button>
+        </Box>
+      )}
+    </Box>
   );
 };
 

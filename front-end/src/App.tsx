@@ -10,8 +10,8 @@ import AdminTokenResetPage from './pages/AdminTokenResetPage';
 import AssociateCreatePage from './pages/AssociateCreatePage';
 import AssociateLoginPage from './pages/AssociateLoginPage';
 import AssociateProfilePage from './pages/AssociateProfilePage';
+import AssociateSelfSupplementPage from './pages/AssociateSelfSupplementPage';
 import AssociatesTablePage from './pages/AssociatesTablePage';
-import ComingSoonPage from './pages/ComingSoonPage';
 import CommunicationPage from './pages/CommunicationPage';
 import DashboardPage from './pages/DashboardPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -23,7 +23,6 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import SettingsPage from './pages/SettingsPage';
 import TokenPage from './pages/TokenPage';
 import PrivateRoute from './routes/PrivateRoute';
-import AssociateSelfSupplementPage from './pages/AssociateSelfSupplementPage';
 
 function App() {
   return (
@@ -45,10 +44,8 @@ function App() {
           <Route path="/login-controle" element={<AccessControlLoginPage />} />
 
           {/* Privadas */}
-          <Route element={<PrivateRoute />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
-
-            {/* Controle de acesso */}
+          {/* Controle de acesso */}
+          <Route element={<PrivateRoute allowedRoles={['SUPER_ADMIN']} />}>
             <Route
               path="/controle-de-acesso"
               element={<AccessControlTablePage />}
@@ -65,33 +62,34 @@ function App() {
               path="/controle-de-acesso/meu-perfil"
               element={<AccessControlProfilePage />}
             />
-
-            {/* Associados */}
-            <Route path="/associados" element={<AssociatesTablePage />} />
-            <Route path="/associados/novo" element={<AssociateCreatePage />} />
-            <Route path="/associados/:id" element={<AssociateProfilePage />} />
-
-            {/* Meu cadastro (associado) */}
-            <Route path="/meu-cadastro" element={<AssociateSelfSupplementPage />} />
-
-            {/* Comunicação */}
-            <Route path="/comunicacao" element={<CommunicationPage />} />
-
-            {/* Configurações */}
-            <Route path="/configuracoes" element={<SettingsPage />} />
-
-            {/* Meu Perfil (admin) */}
-            <Route path="/meu-perfil" element={<AdminProfilePage />} />
-
-            {/* Placeholders */}
-            <Route path="/settings" element={<ComingSoonPage />} />
-            <Route path="/reports" element={<ComingSoonPage />} />
-            <Route path="/users" element={<ComingSoonPage />} />
-            <Route path="/membership-card" element={<ComingSoonPage />} />
           </Route>
 
-          {/* Não implementadas */}
-          <Route path="/futura" element={<ComingSoonPage />} />
+          {/* Administradores e Consultores */}
+          <Route
+            element={<PrivateRoute allowedRoles={['ADMIN', 'CONSULTANT']} />}
+          >
+            <Route path="/admin/associados" element={<AssociatesTablePage />} />
+            <Route
+              path="/admin/associados/novo"
+              element={<AssociateCreatePage />}
+            />
+            <Route
+              path="/admin/associados/:id"
+              element={<AssociateProfilePage />}
+            />
+            <Route path="/admin/comunicacao" element={<CommunicationPage />} />
+            <Route path="/admin/configuracoes" element={<SettingsPage />} />
+            <Route path="/admin/meu-perfil" element={<AdminProfilePage />} />
+          </Route>
+
+          {/* Associados */}
+          <Route element={<PrivateRoute allowedRoles={['ASSOCIATE']} />}>
+            <Route path="/associado/dashboard" element={<DashboardPage />} />
+            <Route
+              path="/associado/meu-cadastro"
+              element={<AssociateSelfSupplementPage />}
+            />
+          </Route>
 
           {/* Inexistentes */}
           <Route path="*" element={<NotFoundPage />} />

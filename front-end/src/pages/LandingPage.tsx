@@ -1,12 +1,59 @@
 import { Box, Container, Grid, Typography } from '@mui/material';
 import Footer from '../components/Landing/Footer';
 import Header from '../components/Landing/Header';
-import SobreImage from '../assets/dom-mauricio.jpg';
+import HeroImage from '../assets/dom-mauricio.jpg';
+import SobreImage from '../assets/sobre-dom.jpeg';
 
 
 const LandingPage = () => (
-  <>
-    <Header />
+  <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <Header transparent />
+
+    {/* ── Hero Section (Header visual) ── */}
+    <Box
+      sx={{
+        position: 'relative',
+        height: { xs: '60vh', md: '80vh' },
+        minHeight: '400px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url(${HeroImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        color: 'white',
+        textAlign: 'center',
+      }}
+    >
+      <Container maxWidth="lg">
+        <Typography
+          variant="h2"
+          component="h1"
+          sx={{
+            fontWeight: 800,
+            mb: 2,
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            fontSize: { xs: '2.5rem', md: '4rem' },
+            textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+          }}
+        >
+          GRUPO CULTURAL DE<br />DOM MAURÍCIO
+        </Typography>
+        <Typography
+          variant="h5"
+          component="p"
+          sx={{
+            fontWeight: 400,
+            opacity: 0.9,
+            fontSize: { xs: '1.2rem', md: '1.8rem' },
+            textShadow: '1px 1px 2px rgba(0,0,0,0.5)',
+          }}
+        >
+          Tradição, Arte e Inclusão Social
+        </Typography>
+      </Container>
+    </Box>
 
     {/* ── Sobre Nós ── */}
     <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
@@ -89,7 +136,7 @@ const LandingPage = () => (
     </Container>
 
     <Footer />
-  </>
+  </Box>
 );
 
 export default LandingPage;

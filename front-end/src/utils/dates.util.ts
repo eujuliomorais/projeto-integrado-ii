@@ -56,9 +56,14 @@ export const isValidBirthDate = (value: string): boolean => {
 export const convertToAPI = (data: string) => {
   const [day, month, year] = data.split('/');
   return `${year}-${month}-${day}`;
-}
+};
 
-export const convertToForm = (data: string) => {
-  const [year, month, day] = data.split('-');
+export const convertToForm = (date?: string): string => {
+  if (!date) return '';
+
+  const [year, month, day] = date.split('-');
+
+  if (!year || !month || !day) return '';
+
   return `${day}/${month}/${year}`;
-}
+};

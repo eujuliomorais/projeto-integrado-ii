@@ -9,7 +9,7 @@
         
         .card { 
             width: 85.6mm; height: 53.98mm; position: relative; overflow: hidden; display: block; 
-            background-color: #EFE9D9; border: none; margin-bottom: 10mm; box-sizing: border-box;
+            background-color: #EFE9D9; border: none; margin-bottom: 0; box-sizing: border-box;
             border-radius: 3mm;
         }
 
@@ -17,10 +17,8 @@
         .sidebar-back { position: absolute; left: 0; top: 0; width: 10mm; height: 100%; border-radius: 3mm 0 0 3mm; overflow: hidden; }
         .sidebar-img { width: 100%; height: 100%; }
 
-        /* FRENTE */
         .content-front { padding: 3mm 13mm 3mm 3mm; position: relative; z-index: 2; }
 
-        /* Cabeçalho: logo à esquerda, texto à direita */
         .header { display: table; width: 100%; margin-bottom: 1.5mm; }
         .header-logo { display: table-cell; width: 16mm; vertical-align: middle; }
         .logo-top { width: 14mm; display: block; }
@@ -31,7 +29,7 @@
         .title { text-align: center; font-size: 3.5mm; font-weight: bold; margin: 1mm 0; }
         
         .details { display: table; width: 100%; margin-top: 1mm; }
-        .photo-box { display: table-cell; width: 18mm; height: 23mm; background-color: #CCC; border-radius: 1mm; vertical-align: middle; text-align: center; }
+        .photo-box { display: table-cell; width: 18mm; height: 23mm; background-color: #EFE9D9; border-radius: 1mm; vertical-align: middle; text-align: center; }
         .photo-box img { width: 100%; height: 100%; border-radius: 1mm; object-fit: cover; }
         
         .fields { display: table-cell; padding-left: 2mm; vertical-align: top; }
@@ -40,61 +38,68 @@
         .label { font-size: 1.2mm; color: #718096; text-transform: uppercase; font-weight: bold; display: block; margin-bottom: 0.2mm; }
         .value { font-size: 2mm; font-weight: bold; color: #000; display: block; text-transform: uppercase; }
 
-        /* VERSO */
-        .content-back { padding: 3mm 3mm 12mm 13mm; text-align: center; position: relative; z-index: 2; }
-        .logo-back { width: 45mm; display: block; margin: 5mm auto 0; }
-        .verify { font-size: 2mm; color: #718096; position: absolute; bottom: 3mm; left: 13mm; right: 3mm; text-align: center; }
+        .content-back { padding: 3mm 3mm 3mm 13mm; text-align: center; position: relative; z-index: 2; }
+        .logo-back { width: 45mm; display: block; margin: 7mm auto 3mm; }
+        .verify { font-size: 2mm; color: #718096; text-align: center; }
     </style>
 </head>
 <body>
 
-<!-- FRENTE -->
-    <div class="card">
-        <div class="content-front">
-            <div class="header">
-                <div class="header-logo">
-                    <img th:src="${logoBase64}" class="logo-top" />
-                </div>
-                <div class="header-info">
-                    <span class="group-name">Grupo Cultural de Dom Maurício</span>
-                    <span class="cnpj">CNPJ: 01.122.327/0001-07</span>
-                </div>
-            </div>
-
-            <div class="title">Carteira do Associado</div>
-
-            <div class="details">
-                <div class="photo-box">
-                    <img th:if="${fotoBase64}" th:src="${fotoBase64}" />
-                </div>
-                <div class="fields">
-                    <div class="row"><div class="field"><span class="label">Nome Completo</span><span class="value" th:text="${card.fullName}"></span></div></div>
-                    <div class="row"><div class="field"><span class="label">Nome Social</span><span class="value" th:text="${card.socialName}"></span></div></div>
-                    <div class="row">
-                        <div class="field" style="width: 50%"><span class="label">CPF</span><span class="value" th:text="${card.cpf}"></span></div>
-                        <div class="field" style="width: 50%"><span class="label">Validade</span><span class="value" th:text="${#temporals.format(card.validity, 'dd/MM/yyyy')}"></span></div>
+<table style="border-collapse: collapse; border: none;">
+    <tr>
+        <!-- FRENTE -->
+        <td style="padding: 0; padding-right: 3mm; vertical-align: top; border-right: 0.3mm dashed #A0AEC0;">
+            <div class="card">
+                <div class="content-front">
+                    <div class="header">
+                        <div class="header-logo">
+                            <img th:src="${logoBase64}" class="logo-top" />
+                        </div>
+                        <div class="header-info">
+                            <span class="group-name">Grupo Cultural de Dom Maurício</span>
+                            <span class="cnpj">CNPJ: 01.122.327/0001-07</span>
+                        </div>
                     </div>
-                    <div class="row">
-                        <div class="field" style="width: 40%"><span class="label">Nº</span><span class="value" th:text="${card.number}"></span></div>
-                        <div class="field" style="width: 60%"><span class="label">Categoria</span><span class="value" th:text="${card.category != null ? card.category.name : 'N/A'}"></span></div>
+
+                    <div class="title">Carteira do Associado</div>
+
+                    <div class="details">
+                        <div class="photo-box">
+                            <img th:if="${fotoBase64}" th:src="${fotoBase64}" />
+                        </div>
+                        <div class="fields">
+                            <div class="row"><div class="field"><span class="label">Nome Completo</span><span class="value" th:text="${card.fullName}"></span></div></div>
+                            <div class="row"><div class="field"><span class="label">Nome Social</span><span class="value" th:text="${!#strings.isEmpty(card.socialName) ? card.socialName : ''}"></span></div></div>
+                            <div class="row">
+                                <div class="field" style="width: 50%"><span class="label">CPF</span><span class="value" th:text="${!#strings.isEmpty(card.cpf) and #strings.length(card.cpf) == 11 ? #strings.substring(card.cpf,0,3) + '.' + #strings.substring(card.cpf,3,6) + '.' + #strings.substring(card.cpf,6,9) + '-' + #strings.substring(card.cpf,9,11) : card.cpf}"></span></div>
+                                <div class="field" style="width: 50%"><span class="label">Validade</span><span class="value" th:text="${#temporals.format(card.validity, 'dd/MM/yyyy')}"></span></div>
+                            </div>
+                            <div class="row">
+                                <div class="field" style="width: 40%"><span class="label">Nº</span><span class="value" th:text="${card.number}"></span></div>
+                                <div class="field" style="width: 60%"><span class="label">Categoria</span><span class="value" th:text="${card.category != null ? card.category.name : 'N/A'}"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sidebar-front"><img th:src="${sidebarBase64}" class="sidebar-img" /></div>
+            </div>
+        </td>
+
+        <!-- VERSO -->
+        <td style="padding: 0; padding-left: 3mm; vertical-align: top;">
+            <div class="card">
+                <div class="sidebar-back"><img th:src="${sidebarBase64}" class="sidebar-img" /></div>
+                <div class="content-back">
+                    <img th:src="${logoBase64}" class="logo-back" />
+                    <div class="verify">
+                        Verifique a autenticidade do documento em:<br>
+                        <strong>www.sigacultural.com</strong>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="sidebar-front"><img th:src="${sidebarBase64}" class="sidebar-img" /></div>
-    </div>
-
-    <!-- VERSO -->
-    <div class="card">
-        <div class="sidebar-back"><img th:src="${sidebarBase64}" class="sidebar-img" /></div>
-        <div class="content-back">
-            <img th:src="${logoBase64}" class="logo-back" />
-            <div class="verify">
-                Verifique a autenticidade do documento em:<br>
-                <strong>www.sigacultural.com</strong>
-            </div>
-        </div>
-    </div>
+        </td>
+    </tr>
+</table>
 
 </body>
 </html>

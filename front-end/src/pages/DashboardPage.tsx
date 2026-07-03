@@ -1,14 +1,10 @@
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-import { adminItems } from '../config/sidebarItems/adminItems';
 import { associateItems } from '../config/sidebarItems/associateItems';
-import { consultantItems } from '../config/sidebarItems/consultantItems';
-import { superAdminItems } from '../config/sidebarItems/superAdminItems';
-
 import MainLayout from '../layouts/MainLayout';
 import { decodeJwt } from '../services/auth/jwt.config';
 
-import type { JSX } from 'react';
 import AssociateDashboard from '../components/Dashboards/AssociateDashboard';
 
 const DashboardPage = () => {
@@ -24,25 +20,19 @@ const DashboardPage = () => {
     return null;
   }
 
-  const menuItemsByRole = {
-    SUPER_ADMIN: superAdminItems,
-    ADMIN: adminItems,
-    CONSULTANT: consultantItems,
-    ASSOCIATE: associateItems,
-  };
+  if (user.role === 'SUPER_ADMIN') {
+    return <Navigate to="/controle-de-acesso" replace />;
+  }
 
-  const dashboardByRole: { [key: string]: JSX.Element } = {
-    // TODO: implmentar dashboards para cada tipo de usuário
-    // SUPER_ADMIN: <SuperAdminDashboard />,
-    // ADMIN: <AdminDashboard />,
-    // CONSULTANT: <ConsultantDashboard />,
-    ASSOCIATE: <AssociateDashboard />,
-  };
+  if (user.role === 'ADMIN' || user.role === 'CONSULTANT') {
+    return <Navigate to="/admin/associados" replace />;
+  }
 
-  const menuItems = menuItemsByRole[user.role];
-  const dashboard = dashboardByRole[user.role];
-
-  return <MainLayout menuItems={menuItems}>{dashboard}</MainLayout>;
+  return (
+    <MainLayout menuItems={associateItems}>
+      <AssociateDashboard />
+    </MainLayout>
+  );
 };
 
 export default DashboardPage;

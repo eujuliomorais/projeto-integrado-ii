@@ -25,28 +25,29 @@ import {
   getCategories,
 } from '../services/associate/associateService';
 import { getValidityDate, updateValidityDate } from '../services/cardService';
+import { convertToForm } from '../utils/dates.util';
 
-const MONTHS_PT = [
-  'Janeiro',
-  'Fevereiro',
-  'Março',
-  'Abril',
-  'Maio',
-  'Junho',
-  'Julho',
-  'Agosto',
-  'Setembro',
-  'Outubro',
-  'Novembro',
-  'Dezembro',
-];
+// const MONTHS_PT = [
+//   'Janeiro',
+//   'Fevereiro',
+//   'Março',
+//   'Abril',
+//   'Maio',
+//   'Junho',
+//   'Julho',
+//   'Agosto',
+//   'Setembro',
+//   'Outubro',
+//   'Novembro',
+//   'Dezembro',
+// ];
 
-const formatDatePT = (iso: string): string => {
-  if (!iso) return '';
-  const [, m, d] = iso.split('-');
-  if (!m || !d) return iso;
-  return `${parseInt(d, 10)} de ${MONTHS_PT[parseInt(m, 10) - 1]}`;
-};
+// const formatDatePT = (iso: string): string => {
+//   if (!iso) return '';
+//   const [, m, d] = iso.split('-');
+//   if (!m || !d) return iso;
+//   return `${parseInt(d, 10)} de ${MONTHS_PT[parseInt(m, 10) - 1]}`;
+// };
 
 interface DateFieldProps {
   label: string;
@@ -81,7 +82,7 @@ const DateField = ({ label, value, onChange }: DateFieldProps) => {
       {/* Campo visível */}
       <OutlinedInput
         readOnly
-        value={formatDatePT(value)}
+        value={convertToForm(value)}
         onClick={() => inputRef.current?.showPicker?.()}
         endAdornment={
           <InputAdornment position="end">

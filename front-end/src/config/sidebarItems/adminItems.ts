@@ -7,22 +7,22 @@ import type { SidebarItem } from '../../components/Sidebar';
 export const adminItems: SidebarItem[] = [
   {
     label: 'Associados',
-    href: '/associados',
+    href: '/admin/associados',
     icon: GroupOutlinedIcon,
   },
   {
     label: 'Comunicação',
-    href: '/comunicacao',
+    href: '/admin/comunicacao',
     icon: MessageOutlinedIcon,
   },
   {
     label: 'Configurações',
-    href: '/configuracoes',
+    href: '/admin/configuracoes',
     icon: SettingsOutlinedIcon,
   },
   {
     label: 'Meu Perfil',
-    href: '/meu-perfil',
+    href: '/admin/meu-perfil',
     icon: PersonOutlined,
   },
 ];

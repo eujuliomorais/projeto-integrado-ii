@@ -14,7 +14,10 @@ const NotFoundPage = () => {
         Página não encontrada
       </Typography>
 
-      <Button variant="contained" onClick={() => navigate('/dashboard')}>
+      <Button
+        variant="contained"
+        onClick={() => navigate('/associado/dashboard')}
+      >
         Voltar
       </Button>
     </Box>

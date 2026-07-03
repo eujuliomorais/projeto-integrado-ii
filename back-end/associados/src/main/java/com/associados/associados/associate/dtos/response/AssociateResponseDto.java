@@ -19,9 +19,10 @@ public record AssociateResponseDto(
         String legalGuardianName,
         UserResponseDto user,
         Address address,
-        SelfDeclaration selfDeclaration
+        SelfDeclaration selfDeclaration,
+        String cardNumber
 ) {
-    public AssociateResponseDto(Associate associate) {
+    public AssociateResponseDto(Associate associate, String cardNumber) {
         this(
                 associate.getId(),
                 associate.getCpf(),
@@ -32,7 +33,8 @@ public record AssociateResponseDto(
                 associate.getLegalGuardianName(),
                 new UserResponseDto(associate.getUser()),
                 associate.getAddress(),
-                associate.getSelfDeclaration()
+                associate.getSelfDeclaration(),
+                cardNumber
         );
     }
 }

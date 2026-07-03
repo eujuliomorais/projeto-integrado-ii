@@ -1,4 +1,3 @@
-import KeyIcon from '@mui/icons-material/Key';
 import {
   Button,
   CircularProgress,
@@ -9,50 +8,76 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import axios from 'axios';
 import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { authResetAccessKey } from '../services/auth/authService';
 import PasswordField from './PasswordField';
 
-interface ChangeAccessKeyDialogProps {
+interface Props {
   open: boolean;
   onClose: () => void;
+  onSuccess?: (message: string) => void;
+  onError?: (message: string) => void;
 }
 
-const ChangeAccessKeyDialog = ({
-  open,
-  onClose,
-}: ChangeAccessKeyDialogProps) => {
+const ChangeAccessKeyDialog = ({ open, onClose, onSuccess, onError }: Props) => {
+  const { token, logout } = useAuth();
+
+  const [newKey, setNewKey] = useState('');
+  const [confirmKey, setConfirmKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleClose = () => {
+    if (loading) return;
+    setNewKey('');
+    setConfirmKey('');
     setError('');
-    const form = e.currentTarget;
-    const data = new FormData(form);
-    const current = data.get('currentKey') as string;
-    const next = data.get('newKey') as string;
+    onClose();
+  };
 
-    if (!current || !next) {
-      setError('Preencha os dois campos.');
+  const handleConfirm = async () => {
+    setError('');
+
+    if (!token) {
+      logout();
+      return;
+    }
+
+    if (newKey.length < 8) {
+      setError('A nova chave deve ter pelo menos 8 caracteres.');
+      return;
+    }
+
+    if (newKey !== confirmKey) {
+      setError('A confirmação não coincide com a nova chave.');
       return;
     }
 
     setLoading(true);
     try {
-      // TODO: API call de troca de chave
-      console.log('Trocar chave:', { current, next });
-      onClose();
-    } catch {
-      setError('Chave atual incorreta. Tente novamente.');
+      await authResetAccessKey({
+        bearerToken: token,
+        newAccessKey: newKey,
+        confirmAccessKey: confirmKey,
+      });
+
+      if (onSuccess) onSuccess('Chave de acesso redefinida com sucesso!');
+      handleClose();
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message ?? err.message);
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Erro desconhecido');
+      }
+
+      if (onError) onError('Erro ao redefinir a chave. Tente novamente.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleClose = () => {
-    if (loading) return;
-    setError('');
-    onClose();
   };
 
   return (
@@ -63,38 +88,28 @@ const ChangeAccessKeyDialog = ({
       fullWidth
       slotProps={{ paper: { sx: { borderRadius: 3, p: 1 } } }}
     >
-      <DialogTitle>
-        <Stack direction="row" sx={{ alignItems: 'center' }} spacing={1.5}>
-          <KeyIcon color="primary" sx={{ fontSize: 26 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Redefinição da Chave de Acesso
-          </Typography>
-        </Stack>
-      </DialogTitle>
+      <DialogTitle sx={{ fontWeight: 700 }}>Redefinição da Chave de Acesso</DialogTitle>
 
       <DialogContent>
-        <form id="change-key-form" onSubmit={handleSubmit} noValidate>
-          <Stack spacing={2.5} sx={{ pt: 1 }}>
-            <PasswordField
-              label="Digite a chave de acesso atual"
-              name="currentKey"
-              size="small"
-              fullWidth
-              required
-              autoComplete="current-password"
-            />
-            <PasswordField
-              label="Digite a nova chave de acesso"
-              name="newKey"
-              size="small"
-              fullWidth
-              required
-              autoComplete="new-password"
-              error={!!error}
-              helperText={error || ' '}
-            />
-          </Stack>
-        </form>
+        <Stack spacing={2} sx={{ pt: 0.5 }}>
+          <PasswordField
+            label="Informe a nova chave"
+            value={newKey}
+            onChange={(e) => setNewKey(e.target.value)}
+          />
+
+          <PasswordField
+            label="Confirme a nova chave"
+            value={confirmKey}
+            onChange={(e) => setConfirmKey(e.target.value)}
+          />
+
+          {error && (
+            <Typography variant="caption" color="error">
+              {error}
+            </Typography>
+          )}
+        </Stack>
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
@@ -113,11 +128,10 @@ const ChangeAccessKeyDialog = ({
           Cancelar
         </Button>
         <Button
-          type="submit"
-          form="change-key-form"
+          onClick={handleConfirm}
+          disabled={loading || !newKey || !confirmKey}
           variant="contained"
           color="primary"
-          disabled={loading}
           sx={{
             borderRadius: 10,
             textTransform: 'none',
@@ -125,11 +139,7 @@ const ChangeAccessKeyDialog = ({
             px: 3,
           }}
         >
-          {loading ? (
-            <CircularProgress size={20} color="inherit" />
-          ) : (
-            'Confirmar'
-          )}
+          {loading ? <CircularProgress size={20} color="inherit" /> : 'Confirmar'}
         </Button>
       </DialogActions>
     </Dialog>

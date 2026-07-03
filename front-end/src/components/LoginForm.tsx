@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import Logo from '../assets/logo-laranja3.svg';
 import { useAuth } from '../hooks/useAuth';
 import { authLogin } from '../services/auth/authService';
 import PasswordField from './PasswordField';
@@ -60,7 +61,7 @@ const LoginForm = () => {
 
       setAuthToken(token);
 
-      navigate('/associados');
+      navigate('/admin/associados');
     } catch {
       setEmailError('Credenciais inválidas. Verifique e tente novamente.');
     } finally {
@@ -75,21 +76,33 @@ const LoginForm = () => {
       noValidate
       sx={{ width: '100%' }}
     >
-      <Stack spacing={3} sx={{ alignItems: 'center' }}>
-        <Typography
-          sx={{
-            color: 'text.secondary',
-            textAlign: 'center',
-            fontWeight: 800,
-            letterSpacing: { xs: 2, sm: 3 },
-            fontSize: { xs: 14, sm: 16 },
-            lineHeight: 1.6,
-          }}
-        >
-          SISTEMA DE EMISSÃO
-          <br />
-          DE CARTEIRINHA
-        </Typography>
+      <Stack spacing={4} sx={{ alignItems: 'center' }}>
+        <Stack spacing={2} sx={{ alignItems: 'center', mb: 1 }}>
+          <Box
+            component="img"
+            src={Logo}
+            alt="logo-SIGA"
+            sx={{
+              height: { xs: 80, sm: 100, md: 130 },
+              width: 'auto',
+              objectFit: 'contain',
+            }}
+          />
+          <Typography
+            sx={{
+              color: 'primary.main',
+              fontWeight: 800,
+              fontSize: { xs: 14, sm: 16 },
+              letterSpacing: 1,
+              textTransform: 'uppercase',
+              borderBottom: '2px solid',
+              borderColor: 'primary.main',
+              pb: 0.5,
+            }}
+          >
+            Gerenciar Associados
+          </Typography>
+        </Stack>
 
         <Button
           component={RouterLink}

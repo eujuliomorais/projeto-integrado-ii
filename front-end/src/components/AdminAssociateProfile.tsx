@@ -3,16 +3,21 @@ import CreditCardOutlinedIcon from '@mui/icons-material/CreditCardOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlined';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
-import PersonIcon from '@mui/icons-material/Person';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SendIcon from '@mui/icons-material/Send';
 
 import {
   Alert,
   Avatar,
+  Backdrop,
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   FormControl,
   FormHelperText,
@@ -44,12 +49,14 @@ import type {
   IAdminAssociateProfileForm,
 } from '../services/associate/associate.types';
 
+import axios from 'axios';
 import {
   getCitiesByState,
   getStates,
   type City,
   type State,
 } from '../services/address/ibgeService';
+import { renovateAssociateCard } from '../services/admin/adminService';
 import { api_base_url } from '../services/api';
 import {
   deleteAssociate,
@@ -58,10 +65,10 @@ import {
   getCategories,
   updateAssociate,
 } from '../services/associate/associateService';
+import { downloadCardById, sendCardEmailById } from '../services/cardService';
 import { isValidBirthDate } from '../utils/dates.util';
 import { maskCEP, maskCPF, maskIncome, maskPhone } from '../utils/masks.util';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
-// import InactivateAssociateDialog from './InactivateAssociateDialog';
 
 const DARK_BTN = {
   bgcolor: '#5F5E5E',
@@ -118,9 +125,13 @@ const AssociateProfile = () => {
 
   const [categories, setCategories] = useState<AssociateCategoryResponse[]>([]);
 
-  // const [inactivateOpen, setInactivateOpen] = useState(false);
+  const [sendingCard, setSendingCard] = useState(false);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  // Overlay de confirmação de dados para renovação de carteirinha
+  const [renovateOpen, setRenovateOpen] = useState(false);
+  const [renovateSaving, setRenovateSaving] = useState(false);
 
   const [originalForm, setOriginalForm] =
     useState<IAdminAssociateProfileForm>(EMPTY);
@@ -156,7 +167,7 @@ const AssociateProfile = () => {
 
     return age < 18;
   })();
-  // const [isActive, setIsActive] = useState<boolean>();
+  const [isActive, setIsActive] = useState<boolean>();
 
   const [errors, setErrors] = useState<
     Partial<Record<keyof IAdminAssociateProfileForm, string>>
@@ -185,7 +196,7 @@ const AssociateProfile = () => {
 
         const res = await getAssociateById(token, id);
 
-        // setIsActive(res.user?.active ?? false);
+        setIsActive(res.user?.active ?? false);
 
         const data = mapAssociateResponseToForm(res);
 
@@ -363,21 +374,6 @@ const AssociateProfile = () => {
     }
   };
 
-  // ! removed from backlog
-  // const handleInactivate = async () => {
-  //   if (!token) return;
-  //   if (!isActive) return;
-
-  //   await inactivateUser(token, form.id);
-  // };
-
-  // const handleActivate = async () => {
-  //   if (!token) return;
-  //   if (isActive) return;
-
-  //   await activateUser(token, form.id);
-  // };
-
   const handleSave = async () => {
     if (!validateForm()) {
       return;
@@ -386,8 +382,6 @@ const AssociateProfile = () => {
     try {
       if (!token || !id) return;
 
-      console.log(form.cpf.replace(/\D/g, ''));
-      console.log(form);
       await updateAssociate(
         token,
         id,
@@ -399,7 +393,6 @@ const AssociateProfile = () => {
           addressZipCode: form.addressZipCode.replace(/\D/g, ''),
         })
       );
-      console.log('foi');
 
       setEditing(false);
 
@@ -422,7 +415,7 @@ const AssociateProfile = () => {
 
       toast('success', 'Associado excluído com sucesso!');
       setTimeout(() => {
-        navigate('/associados');
+        navigate('/admin/associados');
       }, 1500);
     } catch {
       toast('error', 'Erro ao excluir associado.');
@@ -432,7 +425,8 @@ const AssociateProfile = () => {
   const tf = (
     label: string,
     key: keyof IAdminAssociateProfileForm,
-    type = 'text'
+    type = 'text',
+    forceEnabled?: boolean
   ) => {
     const applyMask = (value: string, fieldKey: string) => {
       const v = String(value ?? '').replace(/\D/g, '');
@@ -471,6 +465,8 @@ const AssociateProfile = () => {
       return undefined;
     };
 
+    const isEnabled = forceEnabled ?? editing;
+
     return (
       <TextField
         label={label}
@@ -490,7 +486,7 @@ const AssociateProfile = () => {
             [key]: undefined,
           }));
         }}
-        disabled={!editing}
+        disabled={!isEnabled}
         type={type}
         size="small"
         fullWidth
@@ -536,40 +532,44 @@ const AssociateProfile = () => {
     options: {
       value: string;
       label: string;
-    }[]
-  ) => (
-    <FormControl size="small" fullWidth error={!!errors[key]}>
-      <InputLabel shrink>{label}</InputLabel>
+    }[],
+    forceEnabled?: boolean
+  ) => {
+    const isEnabled = forceEnabled ?? editing;
 
-      <Select
-        // error={!!errors[key]}
-        value={String(form[key] ?? '')}
-        label={label}
-        notched
-        disabled={!editing}
-        onChange={(e) => {
-          setForm((p) => ({
-            ...p,
-            [key]: e.target.value,
-            ...(key === 'addressState' ? { addressCity: '' } : {}),
-          }));
+    return (
+      <FormControl size="small" fullWidth error={!!errors[key]}>
+        <InputLabel shrink>{label}</InputLabel>
 
-          setErrors((prev) => ({
-            ...prev,
-            [key]: undefined,
-            ...(key === 'addressState' ? { addressCity: undefined } : {}),
-          }));
-        }}
-      >
-        {options.map((o) => (
-          <MenuItem key={o.value} value={o.value}>
-            {o.label}
-          </MenuItem>
-        ))}
-      </Select>
-      <FormHelperText>{errors[key]}</FormHelperText>
-    </FormControl>
-  );
+        <Select
+          value={String(form[key] ?? '')}
+          label={label}
+          notched
+          disabled={!isEnabled}
+          onChange={(e) => {
+            setForm((p) => ({
+              ...p,
+              [key]: e.target.value,
+              ...(key === 'addressState' ? { addressCity: '' } : {}),
+            }));
+
+            setErrors((prev) => ({
+              ...prev,
+              [key]: undefined,
+              ...(key === 'addressState' ? { addressCity: undefined } : {}),
+            }));
+          }}
+        >
+          {options.map((o) => (
+            <MenuItem key={o.value} value={o.value}>
+              {o.label}
+            </MenuItem>
+          ))}
+        </Select>
+        <FormHelperText>{errors[key]}</FormHelperText>
+      </FormControl>
+    );
+  };
 
   const sdf = (
     label: string,
@@ -597,6 +597,113 @@ const AssociateProfile = () => {
     </FormControl>
   );
 
+  // ---- Blocos de campos reutilizados entre a view normal e o dialog de renovação ----
+
+  const renderPersonalDataFields = (forceEnabled?: boolean) => (
+    <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Grid size={{ xs: 12, sm: 5 }}>
+        {tf('Nome Completo', 'fullName', 'text', forceEnabled)}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 4 }}>
+        {tf('CPF', 'cpf', 'text', forceEnabled)}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 3 }}>
+        {tf('Data de Nascimento', 'birthDate', 'date', forceEnabled)}
+      </Grid>
+
+      {isUnder18 && (
+        <Grid size={{ xs: 12, sm: 8 }}>
+          {tf('Nome do Responsável', 'guardianName', 'text', forceEnabled)}
+        </Grid>
+      )}
+
+      <Grid size={{ xs: 12, sm: 8 }}>
+        {tf('E-mail', 'email', 'email', forceEnabled)}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 4 }}>
+        {tf('Telefone', 'phone', 'text', forceEnabled)}
+      </Grid>
+    </Grid>
+  );
+
+  const renderAddressFields = (forceEnabled?: boolean) => (
+    <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Grid size={{ xs: 12, sm: 2 }}>
+        {tf('CEP', 'addressZipCode', 'text', forceEnabled)}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 3 }}>
+        {sf(
+          'Estado',
+          'addressState',
+          states.map((state) => ({
+            value: state.sigla,
+            label: state.nome,
+          })),
+          forceEnabled
+        )}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 3 }}>
+        {sf(
+          'Cidade',
+          'addressCity',
+          cities.map((city) => ({
+            value: city.nome,
+            label: city.nome,
+          })),
+          forceEnabled
+        )}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 4 }}>
+        {tf('Bairro', 'addressNeighborhood', 'text', forceEnabled)}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 5 }}>
+        {tf('Rua', 'addressStreet', 'text', forceEnabled)}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 2 }}>
+        {tf('Número', 'addressNumber', 'text', forceEnabled)}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 5 }}>
+        {tf('Complemento', 'addressComplement', 'text', forceEnabled)}
+      </Grid>
+    </Grid>
+  );
+
+  const renderInstitutionalFields = (forceEnabled?: boolean) => (
+    <Grid container spacing={2} sx={{ mb: 3 }}>
+      <Grid size={{ xs: 12, sm: 4 }}>
+        {sf(
+          'Disponibilidade de Horário',
+          'availableHours',
+          [
+            { value: 'MATUTINO', label: 'Matutino' },
+            { value: 'VESPERTINO', label: 'Vespertino' },
+            { value: 'NOTURNO', label: 'Noturno' },
+            { value: 'TODOS', label: 'Todos os turnos' },
+          ],
+          forceEnabled
+        )}
+      </Grid>
+
+      <Grid size={{ xs: 12, sm: 4 }}>
+        {sf(
+          'Categoria',
+          'category',
+          [...categories.map((c) => ({ value: c.id, label: c.name }))],
+          forceEnabled
+        )}
+      </Grid>
+    </Grid>
+  );
+
   if (loading) {
     return (
       <Stack
@@ -611,12 +718,156 @@ const AssociateProfile = () => {
     );
   }
 
+  const handleDownloadCard = async () => {
+    if (!token || !originalForm.id) {
+      toast(
+        'error',
+        'Não foi possível validar suas informações, tente fazer login novamente.'
+      );
+      return;
+    }
+
+    try {
+      const pdfBlob = await downloadCardById(originalForm.id, token);
+
+      const url = window.URL.createObjectURL(pdfBlob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `carteirinha-${originalForm.id}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast('success', 'Carteirinha baixada com sucesso.');
+    } catch (error) {
+      let strError = 'Erro desconhecido ao baixar carteirinha';
+      if (axios.isAxiosError(error)) {
+        if (error.response?.data instanceof Blob) {
+          try {
+            const text = await error.response.data.text();
+            const json = JSON.parse(text);
+            strError = json.message || error.message;
+          } catch {
+            strError = error.message;
+          }
+        } else {
+          strError = error.response?.data?.message ?? error.message;
+        }
+      } else if (error instanceof Error) {
+        strError =
+          'Não foi possível baixar devido a um erro do servidor, tente novamente.';
+      }
+      toast('error', strError);
+    }
+  };
+
+  const handleSendCard = async () => {
+    if (!token || !originalForm.id) {
+      toast(
+        'error',
+        'Não foi possível validar suas informações, tente fazer login novamente.'
+      );
+      return;
+    }
+
+    try {
+      setSendingCard(true);
+
+      await sendCardEmailById(originalForm.id, token);
+
+      toast('success', 'Carteirinha enviada com sucesso.');
+    } catch (error) {
+      let strError = '';
+
+      if (axios.isAxiosError(error)) {
+        strError = error.response?.data?.message ?? error.message;
+      } else if (error instanceof Error) {
+        strError =
+          'Não foi possível enviar devido a um erro do servidor, tente novamente.';
+      } else {
+        strError = 'Erro desconhecido';
+      }
+
+      toast('error', strError);
+    } finally {
+      setSendingCard(false);
+    }
+  };
+
+  const handleOpenRenovateConfirm = () => {
+    setErrors({});
+    setRenovateOpen(true);
+  };
+
+  const handleCancelRenovateConfirm = () => {
+    setForm(originalForm);
+    setErrors({});
+    setRenovateOpen(false);
+  };
+
+  const handleConfirmRenovate = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    if (!token || !id) {
+      toast(
+        'error',
+        'Não foi possível validar suas informações, tente fazer login novamente.'
+      );
+      return;
+    }
+
+    try {
+      setRenovateSaving(true);
+
+      await updateAssociate(
+        token,
+        id,
+        mapFormToUpdatePayload({
+          ...form,
+
+          cpf: form.cpf.replace(/\D/g, ''),
+          phone: form.phone.replace(/\D/g, ''),
+          addressZipCode: form.addressZipCode.replace(/\D/g, ''),
+        })
+      );
+
+      setOriginalForm(form);
+
+      await renovateAssociateCard(id, token);
+
+      toast('success', 'Dados atualizados e carteirinha renovada com sucesso!');
+
+      setRenovateOpen(false);
+    } catch (error) {
+      let strError = '';
+
+      if (axios.isAxiosError(error)) {
+        strError = error.response?.data?.message ?? error.message;
+      } else if (error instanceof Error) {
+        strError =
+          'Não foi possível concluir a renovação devido a um erro no servidor, tente novamente.';
+      } else {
+        strError = 'Erro desconhecido';
+      }
+
+      toast('error', strError);
+    } finally {
+      setRenovateSaving(false);
+    }
+  };
+
   return (
     <>
       <Stack spacing={3}>
         <Button
           startIcon={<ArrowBackIcon sx={{ fontSize: 18 }} />}
-          onClick={() => navigate('/associados')}
+          onClick={() => navigate('/admin/associados')}
           sx={{
             alignSelf: 'flex-start',
             color: 'text.secondary',
@@ -673,22 +924,23 @@ const AssociateProfile = () => {
                 sx={{
                   width: { xs: 100, sm: 140 },
                   height: { xs: 100, sm: 140 },
-                  bgcolor: 'grey.500',
+                  bgcolor: 'primary.main',
                 }}
               >
-                <PersonIcon
-                  sx={{ fontSize: { xs: 64, sm: 90 }, color: 'grey.300' }}
+                <PersonOutlineIcon
+                  sx={{ fontSize: { xs: 64, sm: 90 }, color: '#ffffff' }}
                 />
               </Avatar>
 
               <Chip
-                label="Ativo"
-                size="small"
-                color="success"
+                label={isActive ? 'Ativo' : 'Inativo'}
                 sx={{
-                  fontWeight: 700,
-                  fontSize: 12,
-                  borderRadius: 1,
+                  bgcolor: isActive ? '#8FA882' : '#9E9E9E',
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  height: 26,
+                  width: 80,
                 }}
               />
             </Stack>
@@ -755,23 +1007,6 @@ const AssociateProfile = () => {
                   Excluir Associado
                 </Button>
 
-                {/* <Button
-                  startIcon={
-                    isActive ? (
-                      <LinkOffIcon sx={{ fontSize: 16 }} />
-                    ) : (
-                      <LinkRounded sx={{ fontSize: 16 }} />
-                    )
-                  }
-                  variant="contained"
-                  onClick={() => {
-                    setInactivateOpen(true);
-                  }}
-                  sx={DARK_BTN}
-                >
-                  {isActive ? 'Inativar Vínculo' : 'Ativar Vínculo'}
-                </Button> */}
-
                 <Button
                   startIcon={<DownloadIcon sx={{ fontSize: 16 }} />}
                   variant="contained"
@@ -814,16 +1049,25 @@ const AssociateProfile = () => {
                   startIcon={<RefreshIcon sx={{ fontSize: 16 }} />}
                   variant="contained"
                   sx={DARK_BTN}
+                  onClick={handleOpenRenovateConfirm}
                 >
                   Renovar Carteirinha
                 </Button>
 
                 <Button
-                  startIcon={<SendIcon sx={{ fontSize: 16 }} />}
+                  startIcon={
+                    sendingCard ? (
+                      <CircularProgress size={16} color="inherit" />
+                    ) : (
+                      <SendIcon sx={{ fontSize: 16 }} />
+                    )
+                  }
                   variant="contained"
                   sx={DARK_BTN}
+                  onClick={handleSendCard}
+                  disabled={sendingCard}
                 >
-                  Enviar Carteirinha
+                  {sendingCard ? 'Enviando...' : 'Enviar Carteirinha'}
                 </Button>
 
                 <Button
@@ -836,6 +1080,7 @@ const AssociateProfile = () => {
                     fontWeight: 600,
                     px: 2.5,
                   }}
+                  onClick={handleDownloadCard}
                 >
                   Baixar Carteirinha
                 </Button>
@@ -845,142 +1090,37 @@ const AssociateProfile = () => {
 
           <Divider sx={{ mb: 3 }} />
 
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              mb: 2,
-            }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
             Dados Pessoais
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, sm: 5 }}>
-              {tf('Nome Completo', 'fullName')}
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 4 }}>{tf('CPF', 'cpf')}</Grid>
-
-            <Grid size={{ xs: 12, sm: 3 }}>
-              {tf('Data de Nascimento', 'birthDate', 'date')}
-            </Grid>
-
-            {isUnder18 && (
-              <Grid size={{ xs: 12, sm: 8 }}>
-                {tf('Nome do Responsável', 'guardianName')}
-              </Grid>
-            )}
-
-            <Grid size={{ xs: 12, sm: 8 }}>
-              {tf('E-mail', 'email', 'email')}
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 4 }}>{tf('Telefone', 'phone')}</Grid>
-          </Grid>
+          {renderPersonalDataFields()}
 
           <Divider sx={{ mb: 3 }} />
 
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              mb: 2,
-            }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
             Dados de Endereço
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, sm: 2 }}>{tf('CEP', 'addressZipCode')}</Grid>
-
-            <Grid size={{ xs: 12, sm: 3 }}>
-              {sf(
-                'Estado',
-                'addressState',
-                states.map((state) => ({
-                  value: state.sigla,
-                  label: state.nome,
-                }))
-              )}
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 3 }}>
-              {sf(
-                'Cidade',
-                'addressCity',
-                cities.map((city) => ({
-                  value: city.nome,
-                  label: city.nome,
-                }))
-              )}
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 4 }}>
-              {tf('Bairro', 'addressNeighborhood')}
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 5 }}>{tf('Rua', 'addressStreet')}</Grid>
-
-            <Grid size={{ xs: 12, sm: 2 }}>
-              {tf('Número', 'addressNumber')}
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 5 }}>
-              {tf('Complemento', 'addressComplement')}
-            </Grid>
-          </Grid>
+          {renderAddressFields()}
 
           <Divider sx={{ mb: 3 }} />
 
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              mb: 2,
-            }}
-          >
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
             Dados Institucionais
           </Typography>
 
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid size={{ xs: 12, sm: 4 }}>
-              {sf('Disponibilidade de Horário', 'availableHours', [
-                { value: 'MATUTINO', label: 'Matutino' },
-                { value: 'VESPERTINO', label: 'Vespertino' },
-                { value: 'NOTURNO', label: 'Noturno' },
-                { value: 'TODOS', label: 'Todos os turnos' },
-              ])}
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 4 }}>
-              {sf('Categoria', 'category', [
-                ...categories.map((c) => ({ value: c.id, label: c.name })),
-              ])}
-            </Grid>
-          </Grid>
+          {renderInstitutionalFields()}
 
           {!editing && (
             <>
               <Divider sx={{ mb: 3 }} />
 
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  mb: 2,
-                }}
-              >
+              <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
                 Dados Autodeclaratórios
               </Typography>
 
-              <Grid
-                container
-                spacing={2}
-                sx={{
-                  mb: editing ? 0 : 1,
-                }}
-              >
+              <Grid container spacing={2} sx={{ mb: 1 }}>
                 <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     label="Nome social"
@@ -1093,7 +1233,22 @@ const AssociateProfile = () => {
                       value: 'PREFIRO_NAO_INFORMAR',
                       label: 'Prefiro não informar',
                     },
-                    ...(!['', 'HETEROSSEXUAL', 'HOMOSSEXUAL', 'BISSEXUAL', 'NAO_SEI', 'OUTRO', 'PREFIRO_NAO_INFORMAR'].includes(declaratoryData.sexualOrientation) ? [{ value: declaratoryData.sexualOrientation, label: declaratoryData.sexualOrientation }] : [])
+                    ...(![
+                      '',
+                      'HETEROSSEXUAL',
+                      'HOMOSSEXUAL',
+                      'BISSEXUAL',
+                      'NAO_SEI',
+                      'OUTRO',
+                      'PREFIRO_NAO_INFORMAR',
+                    ].includes(declaratoryData.sexualOrientation)
+                      ? [
+                          {
+                            value: declaratoryData.sexualOrientation,
+                            label: declaratoryData.sexualOrientation,
+                          },
+                        ]
+                      : []),
                   ])}
                 </Grid>
               </Grid>
@@ -1169,15 +1324,6 @@ const AssociateProfile = () => {
         </Paper>
       </Stack>
 
-      {/* <InactivateAssociateDialog
-        open={inactivateOpen}
-        onClose={() => setInactivateOpen(false)}
-        onConfirm={async () => {
-          await handleInactivate();
-        }}
-        associateName={form.fullName}
-      /> */}
-
       <DeleteConfirmDialog
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -1186,6 +1332,99 @@ const AssociateProfile = () => {
         description="Tem certeza que deseja excluir este associado? Todos os dados serão removidos permanentemente do sistema."
         confirmLabel="Sim, Excluir Associado"
       />
+
+      {/* Overlay de confirmação de dados antes da renovação da carteirinha */}
+      <Dialog
+        open={renovateOpen}
+        onClose={renovateSaving ? undefined : handleCancelRenovateConfirm}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          Confirme os dados do associado para prosseguir com a renovação
+        </DialogTitle>
+
+        <DialogContent dividers>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>
+            Dados Pessoais
+          </Typography>
+
+          {renderPersonalDataFields(true)}
+
+          <Divider sx={{ mb: 3 }} />
+
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>
+            Dados de Endereço
+          </Typography>
+
+          {renderAddressFields(true)}
+
+          <Divider sx={{ mb: 3 }} />
+
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>
+            Dados Institucionais
+          </Typography>
+
+          {renderInstitutionalFields(true)}
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button
+            variant="contained"
+            onClick={handleCancelRenovateConfirm}
+            disabled={renovateSaving}
+            sx={{
+              bgcolor: 'grey.300',
+              color: 'text.primary',
+              fontWeight: 700,
+              borderRadius: 10,
+              textTransform: 'none',
+              px: 4,
+              py: 1.2,
+              boxShadow: 'none',
+              '&:hover': {
+                bgcolor: 'grey.400',
+                boxShadow: 'none',
+              },
+            }}
+          >
+            Cancelar
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleConfirmRenovate}
+            disabled={renovateSaving}
+            sx={{
+              fontWeight: 700,
+              borderRadius: 10,
+              textTransform: 'none',
+              px: 4,
+              py: 1.2,
+            }}
+          >
+            {renovateSaving ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              'Confirmar Dados'
+            )}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Backdrop
+        open={sendingCard}
+        sx={{
+          color: '#fff',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+      >
+        <Stack sx={{ alignItems: 'center' }} spacing={2}>
+          <CircularProgress color="inherit" />
+          <Typography>Enviando carteirinha...</Typography>
+        </Stack>
+      </Backdrop>
 
       <Snackbar
         open={snack.open}

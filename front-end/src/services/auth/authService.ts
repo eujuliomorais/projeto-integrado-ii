@@ -179,3 +179,30 @@ export async function authInsertToken({
 
   return res.data;
 }
+
+export interface ResetAccessKeyRequest {
+  bearerToken: string;
+  newAccessKey: string;
+  confirmAccessKey: string;
+}
+
+export async function authResetAccessKey({
+  bearerToken,
+  newAccessKey,
+  confirmAccessKey,
+}: ResetAccessKeyRequest) {
+  const res = await api.patch(
+    '/auth/access-manager/reset-password',
+    {
+      newAccessKey,
+      confirmAccessKey,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${bearerToken}`,
+      },
+    }
+  );
+
+  return res.data;
+}
