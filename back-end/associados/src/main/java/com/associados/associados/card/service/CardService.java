@@ -99,10 +99,13 @@ public class CardService {
         requirePhoto(card);
         byte[] pdf = cardPdfService.generate(card);
         String filename = "carteirinha-" + card.getNumber() + ".pdf";
+        String greetingName = card.getSocialName() != null && !card.getSocialName().isBlank()
+                ? card.getSocialName()
+                : card.getFullName();
         emailService.sendEmailWithAttachment(
                 card.getUser().getEmail(),
                 "Sua Carteirinha - Associados",
-                "Olá " + card.getSocialName() + ",\n\nSegue em anexo sua carteirinha de associado.",
+                "Olá " + greetingName + ",\n\nSegue em anexo sua carteirinha de associado.",
                 pdf,
                 filename);
     }
@@ -157,7 +160,7 @@ public class CardService {
         if (declaration != null && declaration.getSocialName() != null && !declaration.getSocialName().isBlank()) {
             return declaration.getSocialName();
         }
-        return associate.getUser().getName();
+        return "";
     }
 
     private void requirePhoto(Card card) {
