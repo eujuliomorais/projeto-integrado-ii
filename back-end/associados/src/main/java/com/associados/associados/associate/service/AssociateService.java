@@ -19,6 +19,7 @@ import com.associados.associados.associate.repository.AssociateRepository;
 import com.associados.associados.associate.repository.CategoryRepository;
 import com.associados.associados.auth.dtos.request.RegisterAssociateDto;
 import com.associados.associados.auth.infra.exceptions.BusinessException;
+import com.associados.associados.auth.repository.AuthTokenRepository;
 import com.associados.associados.card.entity.Card;
 import com.associados.associados.card.repository.CardRepository;
 import com.associados.associados.card.service.CardService;
@@ -37,6 +38,7 @@ public class AssociateService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final CardService cardService;
+    private final AuthTokenRepository authTokenRepository;
     private final CardRepository cardRepository;
 
     @Transactional
@@ -274,8 +276,9 @@ public class AssociateService {
     @Transactional
     public void deleteAssociate(java.util.UUID id) {
         Associate associate = findAssociateOrThrow(id);
-        
+
         cardService.deleteByAssociateId(associate.getId());
+        authTokenRepository.deleteByUser(associate.getUser());
 
         associateRepository.deleteById(id);
     }

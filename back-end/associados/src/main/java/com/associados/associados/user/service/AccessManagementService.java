@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.associados.associados.auth.infra.exceptions.BusinessException;
+import com.associados.associados.auth.repository.AuthTokenRepository;
 import com.associados.associados.user.dtos.request.ChangeOwnPasswordDto;
 import com.associados.associados.user.dtos.request.PatchUserContactDto;
 import com.associados.associados.user.dtos.request.UpdateProfileDto;
@@ -27,6 +28,7 @@ public class AccessManagementService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthTokenRepository authTokenRepository;
 
     public Page<UserResponseDto> listUsers(UUID requesterId, Pageable pageable) {
         User requester = findUserOrThrow(requesterId);
@@ -155,6 +157,7 @@ public class AccessManagementService {
         }
 
         log.info("User {} deleted user {}", requester.getId(), targetUserId);
+        authTokenRepository.deleteByUser(targetUser);
         userRepository.delete(targetUser);
     }
 

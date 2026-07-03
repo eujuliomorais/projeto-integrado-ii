@@ -20,4 +20,7 @@ public interface AuthTokenRepository extends JpaRepository<AuthToken, UUID> {
 
     @Transactional
     void deleteByUserAndType(User user, TokenType type);
+
+    @Transactional
+    void deleteByUser(User user);
 }
