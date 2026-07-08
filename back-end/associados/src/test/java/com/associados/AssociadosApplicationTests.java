@@ -1,4 +1,4 @@
-package com.associados.associados;
+package com.associados;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
